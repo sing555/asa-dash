@@ -3,307 +3,351 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>朝ダッシュ！ | モーニングルーティン</title>
+<title>朝ダッシュ！ | 兄弟で楽しくモーニング</title>
+<meta name="theme-color" content="#4f46e5" />
 <style>
   :root{
-    --bg:#fffef9; --card:#ffffff; --ink:#1e1f23; --muted:#7a7f87;
-    --accent:#2abf77; --accent2:#4f46e5; --danger:#ef4444;
-    --shadow:0 8px 24px rgba(0,0,0,.08);
+    --bg:#fffef9; --card:#ffffff; --ink:#12131a; --muted:#767b85;
+    --accent:#4f46e5; --accent2:#22c55e; --danger:#ef4444;
+    --barbg:#eef0f3; --shadow:0 10px 28px rgba(0,0,0,.08);
   }
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
-  header{padding:16px 16px 8px;display:flex;align-items:center;gap:12px;position:sticky;top:0;background:linear-gradient(180deg,#fffef9 70%,transparent);backdrop-filter:saturate(1.2) blur(4px);z-index:2}
-  h1{font-size:20px;margin:0}
-  .badge{font-size:12px;color:#fff;background:var(--accent2);padding:4px 8px;border-radius:999px}
-  .container{padding:0 16px 80px;max-width:720px;margin:0 auto}
-  .card{background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:14px;margin:12px 0}
-  .row{display:flex;align-items:center;gap:12px}
-  .grow{flex:1}
-  .time{font-variant-numeric:tabular-nums}
-  .timer{font-size:28px;font-weight:700;letter-spacing:.5px}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#fffef9 80%,#fff0);backdrop-filter:saturate(1.1) blur(4px);padding:14px 14px 8px;border-bottom:1px solid #f1f2f4}
+  .row{display:flex;gap:12px;align-items:center}
+  .space{justify-content:space-between}
+  h1{font-size:18px;margin:0}
+  .timer{font-variant-numeric:tabular-nums;font-size:32px;font-weight:800;letter-spacing:.3px}
+  .late{color:var(--danger)}
   .muted{color:var(--muted);font-size:12px}
-  .field{display:flex;gap:8px;align-items:center}
-  input[type=time]{font-size:16px;border:1px solid #e5e7eb;border-radius:10px;padding:8px}
-  button{appearance:none;border:0;border-radius:12px;padding:10px 14px;background:var(--accent2);color:#fff;font-weight:700;box-shadow:0 3px 0 rgba(0,0,0,.12);cursor:pointer}
-  button.secondary{background:#e5e7eb;color:#111;box-shadow:none}
-  button.ghost{background:transparent;color:var(--muted);box-shadow:none}
-  button.danger{background:var(--danger)}
-  ul#tasks{list-style:none;margin:0;padding:0}
-  li.task{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #eef0f3;border-radius:14px;padding:10px 12px;margin:10px 0;touch-action:none}
-  .handle{cursor:grab;font-size:18px;color:#9aa1aa}
-  .icon{font-size:24px;width:28px;text-align:center}
-  .task-main{flex:1}
-  .task-title{font-weight:700}
-  .bar{height:8px;background:#eef0f3;border-radius:999px;overflow:hidden;margin-top:6px}
+  .bar{height:10px;background:var(--barbg);border-radius:999px;overflow:hidden}
   .bar > span{display:block;height:100%;background:var(--accent);width:0%}
-  .chip{font-size:11px;background:#f3f4f6;color:#374151;border-radius:999px;padding:3px 8px;margin-left:6px}
-  .done{opacity:.55;text-decoration:line-through}
-  .right{display:flex;align-items:center;gap:8px}
+  .wrap{padding:12px;max-width:980px;margin:0 auto}
+  .card{background:var(--card);border:1px solid #eef0f3;border-radius:16px;box-shadow:var(--shadow);padding:12px;margin:10px 0}
+  .controls{gap:10px}
+  input[type=time]{font-size:16px;border:1px solid #e5e7eb;border-radius:10px;padding:8px}
+  button{appearance:none;border:0;border-radius:12px;padding:10px 14px;background:var(--accent);color:#fff;font-weight:700}
+  button.secondary{background:#e5e7eb;color:#111}
+  button.ghost{background:transparent;color:var(--muted)}
+  .grid{display:grid;grid-template-columns:1fr;gap:12px}
+  @media(min-width:680px){ .grid{grid-template-columns:1fr 1fr} }
+  .kid{display:flex;flex-direction:column;gap:10px}
+  .kid h2{font-size:16px;margin:4px 2px}
+  ul.tasks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+  li.task{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;border:1px solid #eef0f3;border-radius:14px;padding:10px 12px;background:#fff}
+  .icon{font-size:22px;width:28px;text-align:center}
+  .title{font-weight:700}
+  .due{font-size:11px;color:#374151;background:#f3f4f6;border-radius:999px;padding:3px 8px;margin-left:8px}
+  .done .title{text-decoration:line-through;opacity:.6}
+  .progress{height:6px;background:#f2f3f6;border-radius:999px;overflow:hidden;margin-top:6px}
+  .progress > span{display:block;height:100%;background:var(--accent2);width:0%}
+  .nav{font-size:12px;color:#0a0a0a;background:#eef7ff;border-left:4px solid #60a5fa;padding:6px 8px;border-radius:10px;margin-top:4px}
   .star{font-size:20px}
-  footer.fab{position:fixed;left:0;right:0;bottom:0;padding:12px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.9)), #fff;border-top:1px solid #eee;display:flex;gap:8px;justify-content:center}
-  .confetti{position:fixed;inset:0;pointer-events:none}
+  .cele{position:fixed;inset:0;pointer-events:none}
+  .center{display:flex;align-items:center;gap:10px}
+  .footer{position:fixed;left:0;right:0;bottom:0;padding:10px;background:#ffffffcc;border-top:1px solid #eee;backdrop-filter:blur(6px)}
+  .history{font-size:13px}
 </style>
 </head>
 <body>
-  <header class="row">
-    <div style="font-size:28px">⏰</div>
-    <div class="grow">
-      <h1>朝ダッシュ！ <span class="badge">今日のチャレンジ</span></h1>
-      <div class="muted">ぜんぶ終わると花丸が出るよ</div>
+  <header>
+    <div class="row space">
+      <div>
+        <h1>朝ダッシュ！</h1>
+        <div class="muted">兄弟で楽しく、7:00出発までに準備をやり切ろう</div>
+      </div>
+      <div class="row controls">
+        <label class="muted">出発</label>
+        <input type="time" id="departAt" />
+        <button class="secondary" id="resetDay">今日の進捗リセット</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row space">
+        <div>
+          <div class="muted">出発まで</div>
+          <div id="countdown" class="timer">--:--</div>
+        </div>
+        <div class="center">
+          <div class="star" id="stars">⭐ 0</div>
+        </div>
+      </div>
+      <div class="bar" aria-label="残り時間"><span id="timeBar"></span></div>
+      <div class="muted" id="windowHint" style="margin-top:6px"></div>
     </div>
   </header>
 
-  <div class="container">
-    <div class="card row">
-      <div class="grow">
-        <div class="muted">出発まで</div>
-        <div class="timer time" id="countdown">--:--</div>
-      </div>
-      <div>
-        <div class="muted">出発時刻</div>
-        <div class="field">
-          <input type="time" id="departAt" />
-          <button class="secondary" id="startDay">スタート</button>
-        </div>
-      </div>
+  <main class="wrap">
+    <div class="grid">
+      <section class="kid card" id="kidA">
+        <h2>おねえちゃん</h2>
+        <ul class="tasks" id="tasksA"></ul>
+        <div class="nav" id="nextA">次は —</div>
+      </section>
+      <section class="kid card" id="kidB">
+        <h2>おとうと</h2>
+        <ul class="tasks" id="tasksB"></ul>
+        <div class="nav" id="nextB">次は —</div>
+      </section>
     </div>
 
-    <div class="card">
-      <ul id="tasks"></ul>
-      <div class="row" style="justify-content:space-between;margin-top:4px">
-        <button class="ghost" id="resetDay">今日の進捗をリセット</button>
-        <div class="muted">長押しまたは「≡」で並び替え</div>
+    <section class="card">
+      <h3 style="margin:6px 2px">履歴</h3>
+      <div class="history" id="history"></div>
+      <div class="row" style="margin-top:8px;justify-content:flex-end">
+        <button class="ghost" id="clearHistory">履歴を全消去</button>
       </div>
-    </div>
+    </section>
+  </main>
 
-    <div class="card row">
-      <div class="grow">
-        <div class="muted">ごほうび</div>
-        <div id="stars" class="star" aria-live="polite">⭐ 0</div>
-      </div>
-      <button class="danger" id="clearAll">すべて初期化</button>
-    </div>
-  </div>
-
-  <canvas class="confetti" id="confetti"></canvas>
+  <canvas id="cele" class="cele"></canvas>
 
 <script>
-/** ------- 初期データ ------- **/
-const DEFAULT_TASKS = [
-  { id:'wake',   title:'おきる',         icon:'🌞', minutes:2 },
-  { id:'toilet', title:'トイレ',         icon:'🚽', minutes:3 },
-  { id:'wash',   title:'かおをあらう',   icon:'🧼', minutes:3 },
-  { id:'meal',   title:'あさごはん',     icon:'🍞', minutes:15 },
-  { id:'brush',  title:'はみがき',       icon:'🪥', minutes:3 },
-  { id:'dress',  title:'きがえる',       icon:'👕', minutes:5 },
-  { id:'bag',    title:'にもつチェック', icon:'🎒', minutes:3 },
-  { id:'shoes',  title:'くつをはく',     icon:'👟', minutes:2 },
+/* ====== 設定・初期値 ====== */
+const KEY="asadash_v4";
+const START_HOUR=6; // 6:00固定（ゲージの基準）
+const DEFAULT_DEPART="07:00";
+const TASKS_DEF=[
+  {id:"meal",  title:"あさごはん", icon:"🍞", due:"06:10"},
+  {id:"hyg",   title:"はみがき・かお・トイレ", icon:"🧼", due:"06:30"},
+  {id:"dress", title:"きがえ", icon:"👕", due:"06:45"},
+  {id:"bag",   title:"にもつチェック", icon:"🎒", due:"06:50"},
 ];
-const KEY = 'asaDashV1';
-const todayKey = () => {
-  const d = new Date(); const y=d.getFullYear(), m=d.getMonth()+1, day=d.getDate();
-  return `${KEY}:${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-};
-const defaultState = () => ({
-  departAt: '08:00',
-  tasks: DEFAULT_TASKS.map(t => ({...t, done:false, progress:0})),
-  stars: 0,
-});
-function loadState() {
-  const raw = localStorage.getItem(todayKey());
-  if (raw) try { return JSON.parse(raw); } catch {}
-  // 新しい日になったら初期タスク順も引き継ぎたい：最後の並びがある場合は使う
-  const last = localStorage.getItem(KEY+':lastOrder');
-  const st = defaultState();
-  if (last) {
-    const ids = JSON.parse(last);
-    st.tasks.sort((a,b)=>ids.indexOf(a.id)-ids.indexOf(b.id));
-  }
-  // 直近の出発時刻
-  const lastDepart = localStorage.getItem(KEY+':lastDepart');
-  if (lastDepart) st.departAt = lastDepart;
-  return st;
+const KIDS=["A","B"]; // A=おねえちゃん, B=おとうと
+
+/* ====== 状態 ====== */
+const todayStr=()=>{const d=new Date();return d.toISOString().slice(0,10)};
+const dayKey=()=>`${KEY}:${todayStr()}`;
+function defaultState(){
+  const baseTasks=()=>TASKS_DEF.map(t=>({...t, done:false, p:0, ts:null}));
+  return {
+    depart: localStorage.getItem(KEY+":lastDepart") || DEFAULT_DEPART,
+    stars: Number(localStorage.getItem(KEY+":stars")||0),
+    kids:{
+      A:{ name:"おねえちゃん", tasks:baseTasks(), startedAt:null, finishedAt:null },
+      B:{ name:"おとうと", tasks:baseTasks(), startedAt:null, finishedAt:null },
+    },
+    history: JSON.parse(localStorage.getItem(KEY+":history")||"[]"),
+    best: JSON.parse(localStorage.getItem(KEY+":best")||"null"), // {date, finishedAt}
+  };
 }
-function saveState() {
-  localStorage.setItem(todayKey(), JSON.stringify(state));
-  localStorage.setItem(KEY+':lastOrder', JSON.stringify(state.tasks.map(t=>t.id)));
-  localStorage.setItem(KEY+':lastDepart', state.departAt);
+let state = JSON.parse(localStorage.getItem(dayKey())||"null") || defaultState();
+
+/* ====== DOM ====== */
+const $depart=document.getElementById("departAt");
+const $count=document.getElementById("countdown");
+const $bar=document.getElementById("timeBar");
+const $hint=document.getElementById("windowHint");
+const $stars=document.getElementById("stars");
+const $tasksA=document.getElementById("tasksA");
+const $tasksB=document.getElementById("tasksB");
+const $nextA=document.getElementById("nextA");
+const $nextB=document.getElementById("nextB");
+const $hist=document.getElementById("history");
+const $reset=document.getElementById("resetDay");
+const $clearHist=document.getElementById("clearHistory");
+
+/* ====== 保存 ====== */
+function persist(){
+  localStorage.setItem(dayKey(), JSON.stringify(state));
+  localStorage.setItem(KEY+":lastDepart", state.depart);
+  localStorage.setItem(KEY+":stars", String(state.stars));
+  localStorage.setItem(KEY+":history", JSON.stringify(state.history));
+  localStorage.setItem(KEY+":best", JSON.stringify(state.best));
 }
 
-/** ------- 状態 ------- **/
-let state = loadState();
+/* ====== 時刻ユーティリティ ====== */
+function todayAt(hhmm){ // "06:10" -> Date today
+  const [h,m]=hhmm.split(":").map(Number);
+  const d=new Date(); d.setHours(h,m,0,0); return d;
+}
+function fmtHM(d){const h=String(d.getHours()).padStart(2,"0"), m=String(d.getMinutes()).padStart(2,"0"); return `${h}:${m}`;}
+function diffMs(a,b){return a-b;}
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
 
-/** ------- DOM参照 ------- **/
-const $tasks = document.getElementById('tasks');
-const $departAt = document.getElementById('departAt');
-const $countdown = document.getElementById('countdown');
-const $stars = document.getElementById('stars');
-const $startDay = document.getElementById('startDay');
-const $resetDay = document.getElementById('resetDay');
-const $clearAll = document.getElementById('clearAll');
-
-/** ------- レンダリング ------- **/
-function render() {
-  $departAt.value = state.departAt;
-  $stars.textContent = `⭐ ${state.stars}`;
-  $tasks.innerHTML = '';
-  state.tasks.forEach((t,i)=>{
-    const li = document.createElement('li');
-    li.className = 'task';
-    li.draggable = true;
-    li.dataset.id = t.id;
-    li.innerHTML = `
-      <div class="handle" title="並び替え">≡</div>
-      <div class="icon" aria-hidden="true">${t.icon}</div>
-      <div class="task-main ${t.done?'done':''}">
-        <div class="task-title">${t.title}
-          <span class="chip time">⏱ ${t.minutes}分</span>
-        </div>
-        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${t.progress}">
-          <span style="width:${t.progress}%"></span>
-        </div>
+/* ====== タスク描画 ====== */
+function renderKid(kidId, $list, $next){
+  $list.innerHTML="";
+  const k=state.kids[kidId];
+  k.tasks.forEach((t,idx)=>{
+    const li=document.createElement("li"); li.className="task"+(t.done?" done":"");
+    li.innerHTML=`
+      <div class="icon">${t.icon}</div>
+      <div>
+        <div class="title">${t.title}<span class="due">〜${t.due}</span></div>
+        <div class="progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${t.p}"><span style="width:${t.p}%"></span></div>
       </div>
-      <div class="right">
-        <button class="${t.done?'secondary':''}" data-action="toggle">${t.done?'もどす':'できた！'}</button>
-        <button class="secondary" data-action="+">+1分</button>
-        <button class="secondary" data-action="-">-1分</button>
+      <div>
+        <button class="secondary" data-act="toggle">${t.done?"もどす":"できた！"}</button>
       </div>
     `;
-    // ボタン動作
-    li.querySelectorAll('button').forEach(btn=>{
-      btn.addEventListener('click',()=>{
-        const act = btn.dataset.action;
-        const task = state.tasks.find(x=>x.id===t.id);
-        if (act==='toggle') {
-          task.done = !task.done;
-          if (task.done) task.progress = 100;
-          chime(task.done ? 'done':'click');
-          if (allDone()) celebrate();
-        } else if (act==='+') {
-          task.progress = Math.min(100, task.progress + Math.round(100/(task.minutes||1)));
-        } else if (act==='-') {
-          task.progress = Math.max(0, task.progress - Math.round(100/(task.minutes||1)));
-        }
-        saveState(); render();
-      });
+    li.querySelector("button").addEventListener("click",()=>{
+      // 開始時刻を記録（最初の完了が押された瞬間を開始とみなす）
+      if (!k.startedAt) k.startedAt=new Date().toISOString();
+      t.done=!t.done; t.p=t.done?100:0; t.ts = t.done ? new Date().toISOString() : null;
+      sfx("done"); sprinkle(li); // 演出
+      // 次タスクナビ
+      const next = k.tasks.find(x=>!x.done);
+      $next.textContent = next ? `次は「${next.title}」だよ！` : `全部できた！おつかれさま！`;
+      // 完了チェック
+      if (allKidsDone()){
+        celebrate();
+        recordHistory();
+      }
+      persist(); render();
     });
-    // DnD
-    li.addEventListener('dragstart', (e)=>{
-      e.dataTransfer.setData('text/plain', t.id);
-    });
-    li.addEventListener('dragover', (e)=>{ e.preventDefault(); li.style.background='#f7f7fb'; });
-    li.addEventListener('dragleave', ()=>{ li.style.background='#fff'; });
-    li.addEventListener('drop',(e)=>{
-      e.preventDefault(); li.style.background='#fff';
-      const fromId = e.dataTransfer.getData('text/plain');
-      const toId = t.id;
-      if (fromId===toId) return;
-      const arr = state.tasks;
-      const from = arr.findIndex(x=>x.id===fromId);
-      const to = arr.findIndex(x=>x.id===toId);
-      const [moved] = arr.splice(from,1);
-      arr.splice(to,0,moved);
-      chime('move'); saveState(); render();
-    });
-    $tasks.appendChild(li);
+    $list.appendChild(li);
   });
+  // 初期ナビ
+  const nxt=k.tasks.find(x=>!x.done);
+  $next.textContent = nxt ? `次は「${nxt.title}」だよ！` : `全部できた！おつかれさま！`;
 }
-function allDone(){ return state.tasks.every(t=>t.done); }
 
-/** ------- 時刻・タイマー ------- **/
-function tick(){
-  // 残り時間
-  const [hh,mm] = state.departAt.split(':').map(Number);
-  const now = new Date();
-  const dep = new Date(now);
-  dep.setHours(hh, mm, 0, 0);
-  let ms = dep - now;
-  let neg = false;
-  if (ms < 0) { neg = true; ms = -ms; }
+function renderHistory(){
+  const items = state.history.slice(-7).reverse(); // 直近7件
+  if (items.length===0){ $hist.textContent="まだ履歴はありません。"; return; }
+  $hist.innerHTML = items.map(h=>{
+    const bestBadge = (state.best && state.best.finishedAt===h.finishedAt) ? " 🏆ベスト" : "";
+    return `<div style="padding:6px 0;border-bottom:1px dashed #eee">
+      <div><strong>${h.date}</strong> 完了 ${h.finishedAt}${bestBadge}</div>
+      <div class="muted">おねえちゃん: ${h.kids.A.map(x=>`${x.id}:${x.time}`).join(" / ")}</div>
+      <div class="muted">おとうと: ${h.kids.B.map(x=>`${x.id}:${x.time}`).join(" / ")}</div>
+    </div>`;
+  }).join("");
+}
+
+function render(){
+  $depart.value = state.depart;
+  $stars.textContent = `⭐ ${state.stars}`;
+  renderKid("A",$tasksA,$nextA);
+  renderKid("B",$tasksB,$nextB);
+  renderHistory();
+}
+
+/* ====== カウントダウン＆ゲージ ====== */
+function timerTick(){
+  const now=new Date();
+  const depart=todayAt(state.depart);
+  const start=todayAt(String(START_HOUR).padStart(2,"0")+":00");
+  // 残り
+  let ms = depart - now;
+  const neg = ms<0;
+  if (neg) ms = -ms;
   const m = Math.floor(ms/60000);
   const s = Math.floor((ms%60000)/1000);
-  $countdown.textContent = `${neg?'-':''}${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  requestAnimationFrame(()=>{}); // noop for smoother paint
+  $count.textContent = `${neg?"-":""}${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  $count.classList.toggle("late", neg);
+  // ゲージ（start→depart の区間に対する now の位置）
+  const total = depart - start;
+  const remain = clamp(depart - now, 0, total);
+  const pct = clamp( (remain/total)*100, 0, 100 );
+  $bar.style.width = `${pct}%`;
+  $bar.style.background = neg ? "var(--danger)" : "var(--accent)";
+  $hint.textContent = `いまの時間の窓：${fmtHM(start)} → ${fmtHM(depart)}（変更可能）`;
 }
-setInterval(tick, 500);
+setInterval(timerTick, 250);
 
-/** ------- ごほうび & 演出 ------- **/
-function celebrate(){
-  state.stars += 1; saveState(); render(); confettiBurst(); chime('celebrate');
-}
-
-/** ------- 音（WebAudioで軽量ビープ） ------- **/
+/* ====== 祝福演出・効果音 ====== */
 let audioCtx;
-function chime(type='click'){
+function sfx(type="click"){
   try{
     audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
-    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
     o.connect(g); g.connect(audioCtx.destination);
-    const map = {
-      click:{f:660, dur:0.06},
-      done:{f:880, dur:0.12},
-      move:{f:520, dur:0.06},
-      celebrate:{f:1040, dur:0.18},
-    };
-    const {f, dur} = map[type] || map.click;
-    o.frequency.value = f; g.gain.value=.06;
-    const t = audioCtx.currentTime;
+    // ランダム音階（達成感を変化させる）
+    const base = {done:[660,740,830,990], win:[880,1040,1240], click:[520,600,680]}[type] || [600];
+    const f = base[Math.floor(Math.random()*base.length)];
+    o.frequency.value = f; g.gain.value=.07;
+    const t=audioCtx.currentTime; const dur = type==="win" ? 0.22 : 0.12;
     o.start(t); o.stop(t+dur);
   }catch(e){}
 }
-
-/** ------- コンフェッティ ------- **/
-const canvas = document.getElementById('confetti');
-const ctx = canvas.getContext('2d');
-let confs = [];
-function resize(){ canvas.width = innerWidth; canvas.height = innerHeight; }
-addEventListener('resize', resize); resize();
-function confettiBurst(){
-  const colors = ['#facc15','#60a5fa','#34d399','#fb7185','#a78bfa'];
-  for(let i=0;i<120;i++){
-    confs.push({
-      x: canvas.width/2, y: 40,
-      vx: (Math.random()-0.5)*6, vy: Math.random()*-6-2,
-      g: 0.12, size: Math.random()*6+3, color: colors[Math.floor(Math.random()*colors.length)], ttl: 160
-    });
+const canvas=document.getElementById("cele"); const ctx=canvas.getContext("2d");
+function resize(){ canvas.width=innerWidth; canvas.height=innerHeight } addEventListener("resize",resize); resize();
+let parts=[];
+function sprinkle(el){
+  const r=el.getBoundingClientRect();
+  const x=r.left+r.width/2, y=r.top+scrollY;
+  for(let i=0;i<20;i++){
+    parts.push({x,y,vx:(Math.random()-0.5)*4,vy:Math.random()*-5-2,g:.18,size:Math.random()*5+2,color:["#facc15","#60a5fa","#34d399","#fb7185","#a78bfa"][i%5],ttl:100});
+  }
+}
+function burstCenter(){
+  const x=innerWidth/2, y=80;
+  for(let i=0;i<140;i++){
+    parts.push({x,y,vx:(Math.random()-0.5)*7,vy:Math.random()*-7-2,g:.12,size:Math.random()*6+3,color:["#facc15","#60a5fa","#34d399","#fb7185","#a78bfa"][i%5],ttl:160});
   }
 }
 function anim(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  confs.forEach(p=>{
-    p.ttl--; p.vy += p.g; p.x += p.vx; p.y += p.vy;
-    ctx.fillStyle = p.color;
-    ctx.fillRect(p.x, p.y, p.size, p.size);
+  parts.forEach(p=>{
+    p.ttl--; p.vy+=p.g; p.x+=p.vx; p.y+=p.vy;
+    ctx.fillStyle=p.color; ctx.fillRect(p.x,p.y,p.size,p.size);
   });
-  confs = confs.filter(p=>p.ttl>0 && p.y < canvas.height+20);
+  parts = parts.filter(p=>p.ttl>0 && p.y<canvas.height+30);
   requestAnimationFrame(anim);
 }
 anim();
 
-/** ------- イベント ------- **/
-$departAt.addEventListener('change',()=>{
-  state.departAt = $departAt.value || '08:00';
-  saveState(); tick();
-});
-$startDay.addEventListener('click', ()=>{
-  // 進捗0 & 完了解除（順番は保持）
-  state.tasks.forEach(t=>{ t.done=false; t.progress=0; });
-  saveState(); render(); chime('click');
-});
-$resetDay.addEventListener('click', ()=>{
-  if (!confirm('今日の進捗をリセットしますか？')) return;
-  state.tasks.forEach(t=>{ t.done=false; t.progress=0; });
-  saveState(); render();
-});
-$clearAll.addEventListener('click', ()=>{
-  if (!confirm('データをすべて初期化しますか？（今日・履歴・設定）')) return;
-  Object.keys(localStorage).forEach(k=>{
-    if (k.startsWith(KEY)) localStorage.removeItem(k);
+/* ====== すべて完了？ ====== */
+function allKidsDone(){
+  return KIDS.every(kid=>{
+    return state.kids[kid].tasks.every(t=>t.done);
   });
-  state = defaultState(); saveState(); render();
+}
+function celebrate(){
+  state.stars += 1;
+  sfx("win"); burstCenter();
+}
+
+/* ====== 履歴・ベスト ====== */
+function recordHistory(){
+  const now = new Date();
+  // 兄弟の個別記録
+  const recKids = {};
+  KIDS.forEach(kid=>{
+    const k=state.kids[kid];
+    k.finishedAt = k.finishedAt || now.toISOString();
+    recKids[kid] = k.tasks.map(t=>{
+      return {id:t.id, time: t.ts ? t.ts.slice(11,16) : "--:--"};
+    });
+  });
+  const finishedHM = fmtHM(now);
+  const rec = {date: todayStr(), finishedAt: finishedHM, kids: recKids};
+  state.history.push(rec);
+  // ベスト：終了時刻が最も早い（6:00スタート前提で単純比較）
+  const toMin=hm=>{const [h,m]=hm.split(":").map(Number); return h*60+m;}
+  if (!state.best || toMin(finishedHM) < toMin(state.best.finishedAt)){
+    state.best = {date: rec.date, finishedAt: finishedHM};
+  }
+  persist(); renderHistory();
+}
+
+/* ====== イベント ====== */
+$depart.addEventListener("change",()=>{
+  state.depart = $depart.value || DEFAULT_DEPART;
+  persist(); timerTick();
+});
+$reset.addEventListener("click",()=>{
+  if(!confirm("今日の進捗をリセットしますか？")) return;
+  KIDS.forEach(kid=>{
+    const k=state.kids[kid];
+    k.tasks = TASKS_DEF.map(t=>({...t, done:false, p:0, ts:null}));
+    k.startedAt=null; k.finishedAt=null;
+  });
+  persist(); render();
+});
+$clearHist.addEventListener("click",()=>{
+  if(!confirm("履歴をすべて削除しますか？")) return;
+  state.history=[]; state.best=null; persist(); renderHistory();
 });
 
-/** ------- 初期表示 ------- **/
-render(); tick();
+/* ====== 初期描画 ====== */
+(function init(){
+  // depart 初期値セット（未設定時は DEFAULT）
+  if (!state.depart) state.depart = DEFAULT_DEPART;
+  persist(); render(); timerTick();
+})();
 </script>
 </body>
 </html>
