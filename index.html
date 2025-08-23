@@ -108,7 +108,7 @@
 <script>
 /* ====== 設定・初期値 ====== */
 const KEY="asadash_v7";
-const START_HOUR=6; // 6:00（ウィンドウ開始）
+const START_HOUR=6;
 const DEFAULT_DEPART="07:00";
 const TASKS_DEF=[
   {id:"meal",  title:"あさごはん", icon:"🍞", due:"06:10"},
@@ -118,7 +118,7 @@ const TASKS_DEF=[
 ];
 const KIDS=["A","B"];
 
-/* ====== JST ユーティリティ ====== */
+/* ====== JSTユーティリティ ====== */
 const JST_OFFSET = 9 * 60; // minutes
 function nowJST(){
   const now = new Date();
@@ -135,14 +135,13 @@ function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
 
 /* ====== 週キー（JST・月曜開始） ====== */
 function weekKeyJST(d){
-  // 月曜開始のISO週をJSTで計算
   const date = new Date(d.getTime());
   const day = (date.getDay()+6)%7; // Mon=0
   const monday = new Date(date); monday.setDate(date.getDate()-day);
   const y = monday.getFullYear();
   const m = String(monday.getMonth()+1).padStart(2,'0');
   const dd= String(monday.getDate()).padStart(2,'0');
-  return `${y}-W${m}${dd}`; // 週の月曜日の日付で表現
+  return `${y}-W${m}${dd}`;
 }
 
 /* ====== 状態 ====== */
@@ -237,7 +236,6 @@ function renderHistory(){
 }
 
 function render(){
-  // 週カウンタの週ずれを補正
   const wk = weekKeyJST(nowJST());
   if (state.week.key !== wk){ state.week = {key:wk, count:0}; }
   $depart.value = state.depart;
@@ -268,15 +266,15 @@ function timerTick(){
   const ms = depart - now; // ロールオーバー済だから >=0
   const m = Math.floor(ms/60000);
   const s = Math.floor((ms%60000)/1000);
-  document.getElementById("countdown").textContent = `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  $count.textContent = `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
   const total = depart - start;
   const pct = clamp((ms/total)*100, 0, 100);
-  document.getElementById("timeBar").style.width = `${pct}%`;
-  document.getElementById("windowHint").textContent = `いまの時間の窓：${fmtHM(start)} → ${fmtHM(depart)}（JST / 出発は変更可）`;
+  $bar.style.width = `${pct}%`;
+  $hint.textContent = `いまの時間の窓：${fmtHM(start)} → ${fmtHM(depart)}（JST / 出発は変更可）`;
 }
 setInterval(timerTick, 250);
 
-/* ====== 祝福演出・効果音（派手め） ====== */
+/* ====== 効果音・演出（派手め） ====== */
 let audioCtx;
 function sfx(type="click"){
   try{
@@ -285,7 +283,7 @@ function sfx(type="click"){
     o.connect(g); g.connect(audioCtx.destination);
     const tones = {done:[660,740,830,990,1110], win:[880,1040,1240,1480], click:[520,600,680]};
     const f = (tones[type]||[600])[Math.floor(Math.random()* (tones[type]||[600]).length)];
-    o.frequency.value = f; g.gain.value=.08; // 普通の音量
+    o.frequency.value = f; g.gain.value=.08;
     const t=audioCtx.currentTime; const dur = type==="win" ? 0.26 : 0.12;
     o.start(t); o.stop(t+dur);
   }catch(e){}
@@ -296,16 +294,13 @@ let parts=[];
 function sprinkle(el){
   const r=el.getBoundingClientRect();
   const x=r.left+r.width/2, y=r.top+scrollY;
-  for(let i=0;i<32;i++){ // 派手め
+  for(let i=0;i<32;i++){
     parts.push({x,y,vx:(Math.random()-0.5)*5,vy:Math.random()*-6-2,g:.18,size:Math.random()*5+2,color:["#facc15","#60a5fa","#34d399","#fb7185","#a78bfa","#f472b6","#10b981"][i%7],ttl:110});
   }
 }
 function burstCenter(){
-  const x=innerWidth/2, y: number = 84;
-}
-function burstCenter(){
   const x=innerWidth/2, y=84;
-  for(let i=0;i<200;i++){ // 派手め
+  for(let i=0;i<200;i++){
     parts.push({x,y,vx:(Math.random()-0.5)*8,vy:Math.random()*-8-2,g:.12,size:Math.random()*6+3,color:["#facc15","#60a5fa","#34d399","#fb7185","#a78bfa","#f472b6","#10b981"][i%7],ttl:180});
   }
 }
@@ -324,13 +319,11 @@ anim();
 function allKidsDone(){ return KIDS.every(k=>state.kids[k].tasks.every(t=>t.done)); }
 function celebrate(){
   state.stars += 1;
-  // 週カウンタ
   const wk = weekKeyJST(nowJST());
   if (state.week.key !== wk){ state.week = {key:wk, count:0}; }
   state.week.count = Math.min(7, state.week.count + 1);
   sfx("win"); burstCenter();
-  // 7に到達で王冠を少しバウンド表示
-  if (state.week.count>=7){ document.getElementById("crown").style.display="block"; }
+  if (state.week.count>=7){ $crown.style.display="block"; }
 }
 function recordHistory(){
   const now = nowJST();
@@ -351,28 +344,20 @@ function recordHistory(){
 }
 
 /* ====== イベント ====== */
-$depart.addEventListener("change",()=>{
-  state.depart = $depart.value || DEFAULT_DEPART; persist(); timerTick();
-});
+$depart.addEventListener("change",()=>{ state.depart = $depart.value || DEFAULT_DEPART; persist(); timerTick(); });
 $reset.addEventListener("click",()=>{
   if(!confirm("今日の進捗をリセットしますか？")) return;
-  KIDS.forEach(kid=>{
+  ["A","B"].forEach(kid=>{
     const k=state.kids[kid];
     k.tasks = TASKS_DEF.map(t=>({...t, done:false, p:0, ts:null}));
     k.startedAt=null; k.finishedAt=null;
   });
   persist(); render();
 });
-$clearHist.addEventListener("click",()=>{
-  if(!confirm("履歴をすべて削除しますか？")) return;
-  state.history=[]; state.best=null; persist(); renderHistory();
-});
+$clearHist.addEventListener("click",()=>{ if(!confirm("履歴をすべて削除しますか？")) return; state.history=[]; state.best=null; persist(); renderHistory(); });
 
 /* ====== 初期描画 ====== */
-(function init(){
-  if (!state.depart) state.depart = DEFAULT_DEPART;
-  persist(); render(); timerTick();
-})();
+(function init(){ if (!state.depart) state.depart = DEFAULT_DEPART; persist(); render(); timerTick(); })();
 </script>
 </body>
 </html>
