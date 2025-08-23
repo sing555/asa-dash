@@ -2,54 +2,52 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
 <title>朝ダッシュ！ | 兄弟で楽しくモーニング</title>
 <meta name="theme-color" content="#4f46e5" />
 <style>
   :root{
     --bg:#fffef9; --card:#ffffff; --ink:#12131a; --muted:#767b85;
     --accent:#4f46e5; --accent2:#22c55e; --danger:#ef4444;
-    --barbg:#eef0f3; --shadow:0 10px 28px rgba(0,0,0,.08);
+    --barbg:#eef0f3; --shadow:0 8px 22px rgba(0,0,0,.07);
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-  header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#fffef9 80%,#fff0);backdrop-filter:saturate(1.1) blur(4px);padding:14px 14px 8px;border-bottom:1px solid #f1f2f4}
-  .row{display:flex;gap:12px;align-items:center}
+  header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#fffef9 85%,#fff0);backdrop-filter:saturate(1.1) blur(4px);padding:10px 10px 6px;border-bottom:1px solid #f1f2f4}
+  .row{display:flex;gap:10px;align-items:center}
   .space{justify-content:space-between}
   h1{font-size:18px;margin:0}
-  .timer{font-variant-numeric:tabular-nums;font-size:32px;font-weight:800;letter-spacing:.3px}
-  .late{color:var(--danger)}
+  .sub{font-size:12px;color:#667085}
+  .timer{font-variant-numeric:tabular-nums;font-size:28px;font-weight:800;letter-spacing:.3px}
   .muted{color:var(--muted);font-size:12px}
-  .bar{height:10px;background:var(--barbg);border-radius:999px;overflow:hidden}
+  .bar{height:8px;background:var(--barbg);border-radius:999px;overflow:hidden}
   .bar > span{display:block;height:100%;background:var(--accent);width:0%}
-  .wrap{padding:12px;max-width:980px;margin:0 auto}
-  .card{background:var(--card);border:1px solid #eef0f3;border-radius:16px;box-shadow:var(--shadow);padding:12px;margin:10px 0}
-  .controls{gap:10px}
-  input[type=time]{font-size:16px;border:1px solid #e5e7eb;border-radius:10px;padding:8px}
-  button{appearance:none;border:0;border-radius:12px;padding:10px 14px;background:var(--accent);color:#fff;font-weight:700}
+  .wrap{padding:10px;max-width:980px;margin:0 auto}
+  .card{background:var(--card);border:1px solid #eef0f3;border-radius:14px;box-shadow:var(--shadow);padding:10px;margin:8px 0}
+  .controls{gap:8px}
+  input[type=time]{font-size:15px;border:1px solid #e5e7eb;border-radius:10px;padding:6px}
+  button{appearance:none;border:0;border-radius:12px;padding:10px 14px;background:var(--accent);color:#fff;font-weight:800}
   button.secondary{background:#e5e7eb;color:#111}
   button.ghost{background:transparent;color:var(--muted)}
-  /* ---- 横並び（横スクロール） ---- */
-  .hgrid{
-    display:grid; grid-auto-flow:column; grid-auto-columns:minmax(300px, 1fr);
-    gap:12px; overflow-x:auto; padding-bottom:8px; scroll-snap-type:x mandatory;
-    -webkit-overflow-scrolling:touch;
-  }
-  .kid{scroll-snap-align:start; display:flex; flex-direction:column; gap:10px; min-height:100%}
-  .kid h2{font-size:16px;margin:4px 2px}
-  ul.tasks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
-  li.task{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;border:1px solid #eef0f3;border-radius:14px;padding:10px 12px;background:#fff}
-  .icon{font-size:22px;width:28px;text-align:center}
-  .title{font-weight:700}
-  .due{font-size:11px;color:#374151;background:#f3f4f6;border-radius:999px;padding:3px 8px;margin-left:8px}
-  .done .title{text-decoration:line-through;opacity:.6}
+  /* ---- 兄弟を常時2列 ---- */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .kid{display:flex;flex-direction:column;gap:8px;min-height:100%}
+  .kid h2{font-size:15px;margin:2px 2px}
+  ul.tasks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+  li.task{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;border:1px solid #eef0f3;border-radius:12px;padding:10px 12px;background:#fff}
+  .icon{font-size:20px;width:26px;text-align:center}
+  .title{font-weight:800;font-size:15px}
+  .due{font-size:11px;color:#374151;background:#f3f4f6;border-radius:999px;padding:3px 8px;margin-left:6px}
+  .done .title{text-decoration:line-through;opacity:.65}
   .progress{height:6px;background:#f2f3f6;border-radius:999px;overflow:hidden;margin-top:6px}
   .progress > span{display:block;height:100%;background:var(--accent2);width:0%}
-  .nav{font-size:12px;color:#0a0a0a;background:#eef7ff;border-left:4px solid #60a5fa;padding:6px 8px;border-radius:10px;margin-top:4px}
-  .star{font-size:20px}
+  .nav{font-size:11px;color:#0a0a0a;background:#eef7ff;border-left:4px solid #60a5fa;padding:6px 8px;border-radius:10px;margin-top:4px}
+  .btn-big{font-size:16px;padding:12px 14px;border-radius:14px;min-width:88px}
+  .star{font-size:18px}
   .cele{position:fixed;inset:0;pointer-events:none}
-  .center{display:flex;align-items:center;gap:10px}
   .history{font-size:13px}
+  .weekly{display:flex;gap:8px;align-items:center}
+  .pill{font-size:12px;background:#f3f4f6;color:#111;border-radius:999px;padding:4px 10px}
 </style>
 </head>
 <body>
@@ -57,7 +55,7 @@
     <div class="row space">
       <div>
         <h1>朝ダッシュ！</h1>
-        <div class="muted">兄弟で楽しく、7:00出発までに準備をやり切ろう</div>
+        <div class="sub">7:00までに準備しよう</div>
       </div>
       <div class="row controls">
         <label class="muted">出発</label>
@@ -71,8 +69,10 @@
           <div class="muted">出発まで</div>
           <div id="countdown" class="timer">--:--</div>
         </div>
-        <div class="center">
+        <div class="row weekly">
           <div class="star" id="stars">⭐ 0</div>
+          <div class="pill" id="weekly">今週：⭐ 0 / 7</div>
+          <div id="crown" style="font-size:20px;display:none">👑</div>
         </div>
       </div>
       <div class="bar" aria-label="残り時間"><span id="timeBar"></span></div>
@@ -81,8 +81,7 @@
   </header>
 
   <main class="wrap">
-    <!-- 横に並ぶ兄弟カード（スワイプ可） -->
-    <div class="hgrid">
+    <div class="grid2">
       <section class="kid card" id="kidA">
         <h2>おねえちゃん</h2>
         <ul class="tasks" id="tasksA"></ul>
@@ -108,7 +107,7 @@
 
 <script>
 /* ====== 設定・初期値 ====== */
-const KEY="asadash_v5";
+const KEY="asadash_v7";
 const START_HOUR=6; // 6:00（ウィンドウ開始）
 const DEFAULT_DEPART="07:00";
 const TASKS_DEF=[
@@ -122,13 +121,11 @@ const KIDS=["A","B"];
 /* ====== JST ユーティリティ ====== */
 const JST_OFFSET = 9 * 60; // minutes
 function nowJST(){
-  // 端末のタイムゾーンに関わらずJSTの現在時刻を返す
   const now = new Date();
   const utcMs = now.getTime() + now.getTimezoneOffset()*60000;
   return new Date(utcMs + JST_OFFSET*60000);
 }
 function dateAtJST(hh,mm, baseDate){
-  // baseDateのJST日付でhh:mm(JST)のDateを返す
   const d = baseDate ? new Date(baseDate) : nowJST();
   const j = new Date(d.getTime()); j.setHours(hh, mm, 0, 0); return j;
 }
@@ -136,14 +133,30 @@ function parseHM(hm){ const [h,m]=hm.split(":").map(Number); return {h,m}; }
 function fmtHM(d){const h=String(d.getHours()).padStart(2,"0"), m=String(d.getMinutes()).padStart(2,"0"); return `${h}:${m}`;}
 function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
 
+/* ====== 週キー（JST・月曜開始） ====== */
+function weekKeyJST(d){
+  // 月曜開始のISO週をJSTで計算
+  const date = new Date(d.getTime());
+  const day = (date.getDay()+6)%7; // Mon=0
+  const monday = new Date(date); monday.setDate(date.getDate()-day);
+  const y = monday.getFullYear();
+  const m = String(monday.getMonth()+1).padStart(2,'0');
+  const dd= String(monday.getDate()).padStart(2,'0');
+  return `${y}-W${m}${dd}`; // 週の月曜日の日付で表現
+}
+
 /* ====== 状態 ====== */
 const todayStr=()=>{const d=nowJST(); return d.toISOString().slice(0,10)};
 const dayKey=()=>`${KEY}:${todayStr()}`;
 function defaultState(){
   const baseTasks=()=>TASKS_DEF.map(t=>({...t, done:false, p:0, ts:null}));
+  const wk = { key: weekKeyJST(nowJST()), count: 0 };
+  const savedWk = JSON.parse(localStorage.getItem(KEY+":week")||"null");
+  const week = (savedWk && savedWk.key===wk.key) ? savedWk : wk;
   return {
     depart: localStorage.getItem(KEY+":lastDepart") || DEFAULT_DEPART,
     stars: Number(localStorage.getItem(KEY+":stars")||0),
+    week,
     kids:{
       A:{ name:"おねえちゃん", tasks:baseTasks(), startedAt:null, finishedAt:null },
       B:{ name:"おとうと",     tasks:baseTasks(), startedAt:null, finishedAt:null },
@@ -160,6 +173,8 @@ const $count=document.getElementById("countdown");
 const $bar=document.getElementById("timeBar");
 const $hint=document.getElementById("windowHint");
 const $stars=document.getElementById("stars");
+const $weekly=document.getElementById("weekly");
+const $crown=document.getElementById("crown");
 const $tasksA=document.getElementById("tasksA");
 const $tasksB=document.getElementById("tasksB");
 const $nextA=document.getElementById("nextA");
@@ -175,6 +190,7 @@ function persist(){
   localStorage.setItem(KEY+":stars", String(state.stars));
   localStorage.setItem(KEY+":history", JSON.stringify(state.history));
   localStorage.setItem(KEY+":best", JSON.stringify(state.best));
+  localStorage.setItem(KEY+":week", JSON.stringify(state.week));
 }
 
 /* ====== タスク描画 ====== */
@@ -189,11 +205,12 @@ function renderKid(kidId, $list, $next){
         <div class="title">${t.title}<span class="due">〜${t.due}</span></div>
         <div class="progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${t.p}"><span style="width:${t.p}%"></span></div>
       </div>
-      <div><button class="secondary" data-act="toggle">${t.done?"もどす":"できた！"}</button></div>
+      <div><button class="secondary btn-big" data-act="toggle">${t.done?"もどす":"できた！"}</button></div>
     `;
     li.querySelector("button").addEventListener("click",()=>{
-      if (!k.startedAt) k.startedAt=nowJST().toISOString();
-      t.done=!t.done; t.p=t.done?100:0; t.ts = t.done ? nowJST().toISOString() : null;
+      const now = nowJST();
+      if (!k.startedAt) k.startedAt=now.toISOString();
+      t.done=!t.done; t.p=t.done?100:0; t.ts = t.done ? now.toISOString() : null;
       sfx("done"); sprinkle(li);
       const next = k.tasks.find(x=>!x.done);
       $next.textContent = next ? `次は「${next.title}」だよ！` : `全部できた！おつかれさま！`;
@@ -205,6 +222,7 @@ function renderKid(kidId, $list, $next){
   const nxt=k.tasks.find(x=>!x.done);
   $next.textContent = nxt ? `次は「${nxt.title}」だよ！` : `全部できた！おつかれさま！`;
 }
+
 function renderHistory(){
   const items = state.history.slice(-7).reverse();
   if (items.length===0){ $hist.textContent="まだ履歴はありません。"; return; }
@@ -217,23 +235,27 @@ function renderHistory(){
     </div>`;
   }).join("");
 }
+
 function render(){
+  // 週カウンタの週ずれを補正
+  const wk = weekKeyJST(nowJST());
+  if (state.week.key !== wk){ state.week = {key:wk, count:0}; }
   $depart.value = state.depart;
   $stars.textContent = `⭐ ${state.stars}`;
+  $weekly.textContent = `今週：⭐ ${state.week.count} / 7`;
+  $crown.style.display = state.week.count>=7 ? "block" : "none";
   renderKid("A",$tasksA,$nextA);
   renderKid("B",$tasksB,$nextB);
   renderHistory();
 }
 
-/* ====== ウィンドウ（6:00 → 出発）をJSTで計算。出発を過ぎていたら翌日にロールオーバー ====== */
+/* ====== 6:00 → 出発（JST）。出発を過ぎていたら翌日にロールオーバー ====== */
 function getWindowDates(){
   const now = nowJST();
   const {h:dh, m:dm} = parseHM(state.depart);
   let depart = dateAtJST(dh, dm, now);
   let start  = dateAtJST(START_HOUR, 0, now);
-
-  // もし現在時刻が「出発」を過ぎていたら、翌日の出発にする
-  if (now > depart) {
+  if (now > depart) { // 夜に開いても巨大マイナスにしない
     depart = new Date(depart.getTime() + 24*3600*1000);
     start  = new Date(start.getTime()  + 24*3600*1000);
   }
@@ -243,35 +265,28 @@ function getWindowDates(){
 /* ====== カウントダウン＆ゲージ ====== */
 function timerTick(){
   const {now, start, depart} = getWindowDates();
-
-  // 残り
-  let ms = depart - now; // ここでは常に >=0 になる（翌日にロールオーバー済）
+  const ms = depart - now; // ロールオーバー済だから >=0
   const m = Math.floor(ms/60000);
   const s = Math.floor((ms%60000)/1000);
-  $count.textContent = `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
-  $count.classList.toggle("late", false);
-
-  // ゲージ
+  document.getElementById("countdown").textContent = `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
   const total = depart - start;
-  const remain = clamp(ms, 0, total);
-  const pct = clamp((remain/total)*100, 0, 100);
-  $bar.style.width = `${pct}%`;
-  $bar.style.background = "var(--accent)";
-  $hint.textContent = `いまの時間の窓：${fmtHM(start)} → ${fmtHM(depart)}（JST / 出発は変更可）`;
+  const pct = clamp((ms/total)*100, 0, 100);
+  document.getElementById("timeBar").style.width = `${pct}%`;
+  document.getElementById("windowHint").textContent = `いまの時間の窓：${fmtHM(start)} → ${fmtHM(depart)}（JST / 出発は変更可）`;
 }
 setInterval(timerTick, 250);
 
-/* ====== 祝福演出・効果音 ====== */
+/* ====== 祝福演出・効果音（派手め） ====== */
 let audioCtx;
 function sfx(type="click"){
   try{
     audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
     const o=audioCtx.createOscillator(), g=audioCtx.createGain();
     o.connect(g); g.connect(audioCtx.destination);
-    const base = {done:[660,740,830,990], win:[880,1040,1240], click:[520,600,680]}[type] || [600];
-    const f = base[Math.floor(Math.random()*base.length)];
-    o.frequency.value = f; g.gain.value=.07;
-    const t=audioCtx.currentTime; const dur = type==="win" ? 0.22 : 0.12;
+    const tones = {done:[660,740,830,990,1110], win:[880,1040,1240,1480], click:[520,600,680]};
+    const f = (tones[type]||[600])[Math.floor(Math.random()* (tones[type]||[600]).length)];
+    o.frequency.value = f; g.gain.value=.08; // 普通の音量
+    const t=audioCtx.currentTime; const dur = type==="win" ? 0.26 : 0.12;
     o.start(t); o.stop(t+dur);
   }catch(e){}
 }
@@ -281,14 +296,17 @@ let parts=[];
 function sprinkle(el){
   const r=el.getBoundingClientRect();
   const x=r.left+r.width/2, y=r.top+scrollY;
-  for(let i=0;i<20;i++){
-    parts.push({x,y,vx:(Math.random()-0.5)*4,vy:Math.random()*-5-2,g:.18,size:Math.random()*5+2,color:["#facc15","#60a5fa","#34d399","#fb7185","#a78bfa"][i%5],ttl:100});
+  for(let i=0;i<32;i++){ // 派手め
+    parts.push({x,y,vx:(Math.random()-0.5)*5,vy:Math.random()*-6-2,g:.18,size:Math.random()*5+2,color:["#facc15","#60a5fa","#34d399","#fb7185","#a78bfa","#f472b6","#10b981"][i%7],ttl:110});
   }
 }
 function burstCenter(){
-  const x=innerWidth/2, y=80;
-  for(let i=0;i<140;i++){
-    parts.push({x,y,vx:(Math.random()-0.5)*7,vy:Math.random()*-7-2,g:.12,size:Math.random()*6+3,color:["#facc15","#60a5fa","#34d399","#fb7185","#a78bfa"][i%5],ttl:160});
+  const x=innerWidth/2, y: number = 84;
+}
+function burstCenter(){
+  const x=innerWidth/2, y=84;
+  for(let i=0;i<200;i++){ // 派手め
+    parts.push({x,y,vx:(Math.random()-0.5)*8,vy:Math.random()*-8-2,g:.12,size:Math.random()*6+3,color:["#facc15","#60a5fa","#34d399","#fb7185","#a78bfa","#f472b6","#10b981"][i%7],ttl:180});
   }
 }
 function anim(){
@@ -302,9 +320,18 @@ function anim(){
 }
 anim();
 
-/* ====== 完了判定・履歴 ====== */
+/* ====== 完了判定・履歴・週ごほうび ====== */
 function allKidsDone(){ return KIDS.every(k=>state.kids[k].tasks.every(t=>t.done)); }
-function celebrate(){ state.stars += 1; sfx("win"); burstCenter(); }
+function celebrate(){
+  state.stars += 1;
+  // 週カウンタ
+  const wk = weekKeyJST(nowJST());
+  if (state.week.key !== wk){ state.week = {key:wk, count:0}; }
+  state.week.count = Math.min(7, state.week.count + 1);
+  sfx("win"); burstCenter();
+  // 7に到達で王冠を少しバウンド表示
+  if (state.week.count>=7){ document.getElementById("crown").style.display="block"; }
+}
 function recordHistory(){
   const now = nowJST();
   const recKids = {};
@@ -320,15 +347,14 @@ function recordHistory(){
   if (!state.best || toMin(finishedHM) < toMin(state.best.finishedAt)){
     state.best = {date: rec.date, finishedAt: finishedHM};
   }
-  persist(); renderHistory();
+  persist(); renderHistory(); render();
 }
 
 /* ====== イベント ====== */
-document.getElementById("departAt").addEventListener("change",()=>{
-  state.depart = document.getElementById("departAt").value || DEFAULT_DEPART;
-  persist(); timerTick();
+$depart.addEventListener("change",()=>{
+  state.depart = $depart.value || DEFAULT_DEPART; persist(); timerTick();
 });
-document.getElementById("resetDay").addEventListener("click",()=>{
+$reset.addEventListener("click",()=>{
   if(!confirm("今日の進捗をリセットしますか？")) return;
   KIDS.forEach(kid=>{
     const k=state.kids[kid];
@@ -337,7 +363,7 @@ document.getElementById("resetDay").addEventListener("click",()=>{
   });
   persist(); render();
 });
-document.getElementById("clearHistory").addEventListener("click",()=>{
+$clearHist.addEventListener("click",()=>{
   if(!confirm("履歴をすべて削除しますか？")) return;
   state.history=[]; state.best=null; persist(); renderHistory();
 });
