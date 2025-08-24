@@ -8,26 +8,25 @@
 <!-- Tailwind -->
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.10/dist/tailwind.min.css" rel="stylesheet">
 <style>
-  :root { --ok:#10b981; --warn:#f59e0b; --bad:#ef4444; }
   .timer { font-variant-numeric: tabular-nums; }
 </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-50 to-emerald-50 text-gray-900">
+<body class="bg-gradient-to-br from-yellow-50 to-pink-50 text-gray-900">
 
 <!-- Header -->
-<header class="p-4 bg-indigo-600 text-white shadow-md">
-  <h1 class="text-2xl font-extrabold">⏰ 朝ダッシュ！</h1>
+<header class="p-4 bg-pink-500 text-white shadow-md">
+  <h1 class="text-2xl font-extrabold">🎉 朝ダッシュ！</h1>
   <p class="text-sm opacity-80">7:00までに準備しよう</p>
 </header>
 
 <!-- 全体タイマー -->
-<section class="max-w-4xl mx-auto mt-4 px-4">
+<section class="max-w-5xl mx-auto mt-4 px-4">
   <div class="rounded-2xl bg-white shadow p-4 flex items-center justify-between">
     <div>
       <div class="text-xs text-gray-500">出発まで</div>
-      <div id="countdown" class="timer text-4xl font-extrabold text-gray-900">--:--</div>
+      <div id="countdown" class="timer text-4xl font-extrabold">--:--</div>
     </div>
-    <div class="w-1/2">
+    <div class="flex-1 mx-4">
       <div class="h-3 rounded-full bg-gray-200 overflow-hidden">
         <div id="timeBar" class="h-3 bg-emerald-500 w-0"></div>
       </div>
@@ -36,19 +35,19 @@
   </div>
 </section>
 
-<!-- 兄弟カード -->
-<main class="max-w-4xl mx-auto mt-6 px-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- 兄弟 横並び -->
+<main class="max-w-5xl mx-auto mt-6 px-4 grid grid-cols-2 gap-4">
 
   <!-- Kid A -->
   <section class="rounded-2xl bg-white shadow p-4" id="kidA">
-    <h2 class="text-lg font-bold mb-2">👧 おねえちゃん</h2>
+    <h2 class="text-lg font-bold mb-3 text-pink-600">👧 おねえちゃん</h2>
     <ul id="tasksA" class="space-y-3"></ul>
     <div id="nextA" class="mt-3 text-sm text-indigo-600 font-semibold"></div>
   </section>
 
   <!-- Kid B -->
   <section class="rounded-2xl bg-white shadow p-4" id="kidB">
-    <h2 class="text-lg font-bold mb-2">👦 おとうと</h2>
+    <h2 class="text-lg font-bold mb-3 text-yellow-600">👦 おとうと</h2>
     <ul id="tasksB" class="space-y-3"></ul>
     <div id="nextB" class="mt-3 text-sm text-indigo-600 font-semibold"></div>
   </section>
@@ -56,35 +55,45 @@
 </main>
 
 <!-- 履歴 -->
-<section class="max-w-4xl mx-auto mt-6 px-4">
+<section class="max-w-5xl mx-auto mt-6 px-4">
   <details class="rounded-2xl bg-white shadow p-4">
-    <summary class="font-bold cursor-pointer">📊 履歴（直近7日）</summary>
+    <summary class="font-bold cursor-pointer">📊 履歴（直近）</summary>
     <div id="history" class="mt-3 space-y-2 text-sm text-gray-700"></div>
   </details>
 </section>
 
 <script>
-/* ==== 基本設定 ==== */
+/* ==== 設定 ==== */
 const TASKS = [
-  { id:"meal", title:"あさごはん", icon:"🍞", due:"06:10" },
-  { id:"hyg",  title:"はみがき・かお・トイレ", icon:"🧼", due:"06:30" },
-  { id:"dress",title:"きがえ", icon:"👕", due:"06:45" }
+  { id:"meal", title:"あさごはん", icon:"🍞" },
+  { id:"hyg",  title:"はみがき・かお・トイレ", icon:"🧼" },
+  { id:"dress",title:"きがえ", icon:"👕" }
 ];
 const KIDS=["A","B"];
-let state = {
-  stars:0,
-  kids:{ A:{tasks:JSON.parse(JSON.stringify(TASKS))}, B:{tasks:JSON.parse(JSON.stringify(TASKS))} },
-  history:[]
-};
+let state = { stars:0, kids:{ A:{tasks:JSON.parse(JSON.stringify(TASKS))}, B:{tasks:JSON.parse(JSON.stringify(TASKS))} }, history:[] };
 
 /* ==== DOM ==== */
 const $count=document.getElementById("countdown");
 const $bar=document.getElementById("timeBar");
 const $stars=document.getElementById("stars");
 
-/* ==== 時刻ユーティリティ ==== */
-function now(){return new Date();}
-function fmt(t){const m=Math.floor(t/60),s=t%60;return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
+/* ==== 音（合成音） ==== */
+let ctx;
+function beep(freqs){
+  ctx = ctx || new (window.AudioContext||window.webkitAudioContext)();
+  const t=ctx.currentTime;
+  freqs.forEach((f,i)=>{
+    const osc=ctx.createOscillator(), g=ctx.createGain();
+    osc.type="sine"; osc.frequency.value=f;
+    g.gain.value=0.1; osc.connect(g); g.connect(ctx.destination);
+    osc.start(t+i*0.1); osc.stop(t+i*0.1+0.2);
+  });
+}
+function sfx(type){
+  if(type==="done") beep([800,1200]);
+  if(type==="best") beep([1000,1500,2000]);
+  if(type==="win")  beep([600,900,1200,1500]);
+}
 
 /* ==== タスク描画 ==== */
 function renderKid(kidId){
@@ -92,20 +101,20 @@ function renderKid(kidId){
   list.innerHTML="";
   state.kids[kidId].tasks.forEach(t=>{
     const li=document.createElement("li");
-    li.className="flex items-center justify-between p-3 rounded-xl border";
+    li.className="flex items-center justify-between p-3 rounded-xl border bg-gradient-to-r from-indigo-50 to-pink-50";
     li.innerHTML=`
       <div class="flex items-center gap-3">
         <span class="text-2xl">${t.icon}</span>
-        <div>
-          <div class="font-bold">${t.title}</div>
-          <div class="text-xs text-gray-500">〜${t.due}</div>
-        </div>
+        <div class="font-bold">${t.title}</div>
       </div>
-      <button class="btn px-4 py-2 rounded-xl font-bold text-white bg-indigo-600">${t.done?"もどす":"できた！"}</button>
+      <button class="px-4 py-2 rounded-xl font-bold text-white ${t.done?"bg-gray-400":"bg-pink-500"}">
+        ${t.done?"もどす":"できた！"}
+      </button>
     `;
     li.querySelector("button").onclick=()=>{
       t.done=!t.done;
-      if(t.done){ state.stars++; }
+      if(t.done){ state.stars++; sfx("done"); }
+      else { sfx("best"); }
       render();
     };
     list.appendChild(li);
@@ -115,17 +124,16 @@ function renderKid(kidId){
 /* ==== タイマー ==== */
 function tick(){
   const target=new Date();target.setHours(7,0,0,0);
-  const sec=Math.max(0,Math.floor((target-now())/1000));
-  $count.textContent=fmt(sec);
+  const sec=Math.max(0,Math.floor((target-new Date())/1000));
+  $count.textContent=`${String(Math.floor(sec/60)).padStart(2,"0")}:${String(sec%60).padStart(2,"0")}`;
   const pct=sec/(60*60)*100;
   $bar.style.width=pct+"%";
   $bar.className="h-3 "+(sec>1200?"bg-emerald-500":sec>600?"bg-yellow-400":"bg-red-500");
 }
 
-/* ==== 履歴描画 ==== */
+/* ==== 履歴 ==== */
 function renderHistory(){
-  const h=document.getElementById("history");
-  h.innerHTML=state.history.map(r=>`<div>${r}</div>`).join("");
+  document.getElementById("history").innerHTML = state.history.map(r=>`<div>${r}</div>`).join("");
 }
 
 /* ==== 全体描画 ==== */
