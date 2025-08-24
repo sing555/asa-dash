@@ -5,61 +5,53 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>朝ダッシュ！</title>
 
-<!-- Tailwind -->
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.10/dist/tailwind.min.css" rel="stylesheet">
-<!-- Chart.js (履歴グラフ用) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-
 <style>
-  .timer { font-variant-numeric: tabular-nums; }
-  .flash {
-    animation: flash-bg 900ms ease-in-out 1;
-  }
-  @keyframes flash-bg{
-    0%{ background:rgba(255,255,0,.0); }
-    25%{ background:rgba(255,255,0,.35); }
-    100%{ background:rgba(255,255,0,0); }
-  }
-  /* 紙吹雪キャンバス */
-  #cele { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
+  .timer{font-variant-numeric:tabular-nums}
+  .flash{animation:flash-bg .9s ease-in-out}
+  @keyframes flash-bg{0%{background:rgba(255,255,0,0)}25%{background:rgba(255,255,0,.35)}100%{background:rgba(255,255,0,0)}}
+  #cele{position:fixed;inset:0;pointer-events:none;z-index:50}
 </style>
 </head>
 <body class="bg-gradient-to-br from-yellow-50 to-pink-50 text-gray-900">
 
-<!-- Header -->
 <header class="p-4 bg-pink-500 text-white shadow-md">
   <h1 class="text-2xl font-extrabold">🎉 朝ダッシュ！</h1>
-  <p class="text-sm opacity-90">7:00までに準備しよう</p>
+  <p class="text-sm opacity-90" id="subtitle">7:00までに準備しよう</p>
 </header>
 
-<!-- 全体タイマー -->
+<!-- 上部：出発時刻 + 残り時間 -->
 <section class="max-w-5xl mx-auto mt-4 px-4">
-  <div id="topCard" class="rounded-2xl bg-white shadow p-4 flex items-center gap-4">
-    <div class="flex-1">
+  <div id="topCard" class="rounded-2xl bg-white shadow p-4 flex flex-wrap items-center gap-4">
+    <div class="flex items-center gap-2">
+      <span class="text-xs text-gray-500">出発</span>
+      <input type="time" id="departAt" class="rounded-lg border px-2 py-1 text-sm">
+      <span id="winHint" class="text-xs text-gray-500"></span>
+    </div>
+    <div class="flex-1 min-w-[220px]">
       <div class="text-xs text-gray-500">出発まで</div>
       <div id="countdown" class="timer text-4xl md:text-5xl font-extrabold">--:--</div>
       <div class="h-3 rounded-full bg-gray-200 overflow-hidden mt-3">
         <div id="timeBar" class="h-3 bg-emerald-500 w-0"></div>
       </div>
     </div>
-    <div class="text-right min-w-24">
+    <div class="text-right min-w-24 ml-auto">
       <div id="stars" class="text-3xl">⭐0</div>
       <div class="text-xs text-gray-500 mt-1">タップで増えるよ</div>
     </div>
   </div>
 </section>
 
-<!-- 兄弟 横並び -->
+<!-- 兄弟：横並び -->
 <main class="max-w-5xl mx-auto mt-6 px-4 grid grid-cols-1 md:grid-cols-2 gap-4">
 
-  <!-- Kid A -->
   <section class="rounded-2xl bg-white shadow p-4" id="kidA">
     <h2 class="text-lg font-black mb-3 text-pink-600">👧 おねえちゃん</h2>
     <ul id="tasksA" class="space-y-3"></ul>
     <div id="nextA" class="mt-3 text-sm text-indigo-600 font-bold"></div>
   </section>
 
-  <!-- Kid B -->
   <section class="rounded-2xl bg-white shadow p-4" id="kidB">
     <h2 class="text-lg font-black mb-3 text-yellow-600">👦 おとうと</h2>
     <ul id="tasksB" class="space-y-3"></ul>
@@ -68,14 +60,12 @@
 
 </main>
 
-<!-- 履歴（折りたたみ＋グラフ） -->
+<!-- 履歴＋グラフ -->
 <section class="max-w-5xl mx-auto mt-6 px-4">
   <details class="rounded-2xl bg-white shadow p-4" open>
     <summary class="font-bold cursor-pointer">📊 履歴 & グラフ（直近7日）</summary>
     <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
-      <div class="col-span-2">
-        <canvas id="histChart" height="140"></canvas>
-      </div>
+      <div class="col-span-2"><canvas id="histChart" height="140"></canvas></div>
       <div>
         <div id="stats" class="text-sm text-gray-700 mb-2">平均 --:-- / 最速 --:--</div>
         <div id="history" class="space-y-2 text-sm text-gray-700"></div>
@@ -85,102 +75,83 @@
   </details>
 </section>
 
-<!-- 紙吹雪 -->
 <canvas id="cele"></canvas>
 
 <script>
-/* ==== 設定 ==== */
-const TASKS = [
-  { id:"meal",  title:"あさごはん", icon:"🍞", due:"06:10" },
-  { id:"hyg",   title:"はみがき・かお・トイレ", icon:"🧼", due:"06:30" },
-  { id:"dress", title:"きがえ", icon:"👕", due:"06:45" },
-  { id:"bag",   title:"にもつチェック", icon:"🎒", due:"06:50" }
+/* ========== 設定/状態 ========== */
+const KEY="asadash_v9_2";
+const DEFAULT_DEPART="07:00"; // ここがデフォルト
+const START_HOUR=6;           // 窓の開始（6:00固定）
+const TASKS=[
+  {id:"meal", title:"あさごはん", icon:"🍞"},
+  {id:"hyg",  title:"はみがき・かお・トイレ", icon:"🧼"},
+  {id:"dress",title:"きがえ", icon:"👕"},
+  {id:"bag",  title:"にもつチェック", icon:"🎒"},
 ];
-const KIDS = ["A","B"];
-const KEY  = "asadash_v9";
+const KIDS=["A","B"];
 
-/* ==== 状態 ==== */
 function cloneTasks(){ return TASKS.map(t=>({...t,done:false,ts:null,dur:null})) }
-let state = JSON.parse(localStorage.getItem(KEY) || "null") || {
+let state = JSON.parse(localStorage.getItem(KEY)||"null") || {
+  depart: localStorage.getItem(KEY+":depart") || DEFAULT_DEPART,
   stars: 0,
-  kids: { A:{tasks:cloneTasks()}, B:{tasks:cloneTasks()} },
-  history: [] // [{date, finishedAt, totalSec}]
+  kids:{ A:{tasks:cloneTasks()}, B:{tasks:cloneTasks()} },
+  history:[]
 };
-function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+function save(){ localStorage.setItem(KEY, JSON.stringify(state)); localStorage.setItem(KEY+":depart", state.depart); }
 
-/* ==== DOM ==== */
-const $count = document.getElementById("countdown");
-const $bar   = document.getElementById("timeBar");
-const $stars = document.getElementById("stars");
-const $hist  = document.getElementById("history");
-const $stats = document.getElementById("stats");
-const $top   = document.getElementById("topCard");
+/* ========== DOM ========== */
+const $depart=document.getElementById("departAt");
+const $subtitle=document.getElementById("subtitle");
+const $winHint=document.getElementById("winHint");
+const $count=document.getElementById("countdown");
+const $bar=document.getElementById("timeBar");
+const $stars=document.getElementById("stars");
+const $hist=document.getElementById("history");
+const $stats=document.getElementById("stats");
+const $top=document.getElementById("topCard");
 
-/* ==== ユーティリティ ==== */
-const now = ()=> new Date();
-function fmtSec(sec){ const m=Math.floor(sec/60), s=sec%60; return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`; }
+/* ========== ユーティリティ ========== */
+const now = ()=>new Date();
+function parseHM(hm){const [h,m]=hm.split(":").map(Number);return {h,m}}
+function fmtSec(sec){const m=Math.floor(sec/60),s=sec%60;return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
+function dateAt(h,m,base){const d=new Date(base||Date.now()); d.setHours(h,m,0,0); return d;}
 
-/* ==== 効果音（合成音：軽量・iOS対応） ==== */
+/* 窓（6:00 → 出発）。出発を過ぎていたら翌日に回す */
+function getWindow(){
+  const {h:dh,m:dm}=parseHM(state.depart);
+  const n=now();
+  let depart=dateAt(dh,dm,n);
+  let start=dateAt(START_HOUR,0,n);
+  if(n>depart){ depart=new Date(depart.getTime()+86400000); start=new Date(start.getTime()+86400000); }
+  return {now:n,start,depart};
+}
+
+/* ========== 効果音 ========== */
 let audio;
-function sfx(type="click"){
+function sfx(kind="click"){
   try{
     audio = audio || new (window.AudioContext||window.webkitAudioContext)();
-    const t0 = audio.currentTime;
-    const out = audio.createGain(); out.gain.value = 0.08; out.connect(audio.destination);
-    const add=(f,t,d,type="sine")=>{
-      const o=audio.createOscillator(), g=audio.createGain();
-      o.type=type; o.frequency.value=f; o.connect(g); g.connect(out);
-      g.gain.setValueAtTime(0.0001,t);
-      g.gain.linearRampToValueAtTime(0.25,t+0.01);
-      g.gain.exponentialRampToValueAtTime(0.0001,t+d);
-      o.start(t); o.stop(t+d+0.02);
-    };
-    if(type==="done"){ add(900,t0,0.12,"triangle"); add(1200,t0+0.08,0.10,"triangle"); }
-    else if(type==="best"){ add(1200,t0,0.1,"square"); add(1600,t0+0.1,0.1,"square"); add(2000,t0+0.2,0.08,"square"); }
-    else if(type==="win"){ add(660,t0,0.18,"sawtooth"); add(880,t0,0.18,"sawtooth"); add(1100,t0,0.18,"sawtooth"); }
-    else { add(700,t0,0.08,"sine"); }
+    const t0=audio.currentTime;
+    const out=audio.createGain(); out.gain.value=.08; out.connect(audio.destination);
+    const beep=(f,t,d,type="sine")=>{const o=audio.createOscillator(),g=audio.createGain();o.type=type;o.frequency.value=f;o.connect(g);g.connect(out);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.25,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.start(t);o.stop(t+d+.02)};
+    if(kind==="done"){beep(900,t0,.12,"triangle");beep(1200,t0+.08,.1,"triangle");}
+    else if(kind==="win"){beep(660,t0,.18,"sawtooth");beep(880,t0,.18,"sawtooth");beep(1100,t0,.18,"sawtooth");}
+    else{beep(700,t0,.08,"sine");}
   }catch(e){}
 }
 
-/* ==== 紙吹雪 ==== */
-const cvs = document.getElementById("cele"), ctx = cvs.getContext("2d");
-function resize(){ cvs.width=innerWidth; cvs.height=innerHeight; } addEventListener("resize",resize); resize();
+/* ========== 紙吹雪 ========== */
+const cvs=document.getElementById("cele"), ctx=cvs.getContext("2d");
+function resize(){cvs.width=innerWidth;cvs.height=innerHeight} addEventListener("resize",resize); resize();
 let parts=[];
-function burst(){
-  const x=innerWidth/2, y=100;
-  for(let i=0;i<240;i++){
-    parts.push({
-      x,y,
-      vx:(Math.random()-0.5)*8,
-      vy:(Math.random()*-9)-2,
-      g:0.12,
-      size:Math.random()*6+3,
-      color:["#facc15","#60a5fa","#34d399","#fb7185","#a78bfa","#f472b6","#10b981"][i%7],
-      ttl: 190
-    });
-  }
-}
-function sprinkleAt(el){
-  const r=el.getBoundingClientRect(), x=r.left+r.width/2, y=r.top+scrollY;
-  for(let i=0;i<36;i++){
-    parts.push({
-      x,y,vx:(Math.random()-0.5)*5,vy:(Math.random()*-6)-2,g:.18,size:Math.random()*5+2,
-      color:["#facc15","#60a5fa","#34d399","#fb7185","#a78bfa","#f472b6","#10b981"][i%7],ttl:110
-    });
-  }
-}
-(function anim(){
-  ctx.clearRect(0,0,cvs.width,cvs.height);
-  parts.forEach(p=>{ p.ttl--; p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; ctx.fillStyle=p.color; ctx.fillRect(p.x,p.y,p.size,p.size); });
-  parts = parts.filter(p=>p.ttl>0 && p.y<cvs.height+30);
-  requestAnimationFrame(anim);
-})();
+function burst(){const x=innerWidth/2,y=100; for(let i=0;i<220;i++){parts.push({x,y,vx:(Math.random()-.5)*8,vy:Math.random()*-9-2,g:.12,size:Math.random()*6+3,color:["#facc15","#60a5fa","#34d399","#fb7185","#a78bfa","#f472b6","#10b981"][i%7],ttl:190})}}
+function sprinkleAt(el){const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+scrollY;for(let i=0;i<36;i++){parts.push({x,y,vx:(Math.random()-.5)*5,vy:Math.random()*-6-2,g:.18,size:Math.random()*5+2,color:["#facc15","#60a5fa","#34d399","#fb7185","#a78bfa","#f472b6","#10b981"][i%7],ttl:110})}}
+!function anim(){ctx.clearRect(0,0,cvs.width,cvs.height);parts.forEach(p=>{p.ttl--;p.vy+=p.g;p.x+=p.vx;p.y+=p.vy;ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,p.size,p.size)});parts=parts.filter(p=>p.ttl>0&&p.y<cvs.height+30);requestAnimationFrame(anim)}();
 
-/* ==== 兄弟タスクリスト ==== */
+/* ========== タスクUI ========== */
 function renderKid(kidId){
-  const list = document.getElementById("tasks"+kidId);
-  list.innerHTML = "";
-  const k = state.kids[kidId];
+  const list=document.getElementById("tasks"+kidId); list.innerHTML="";
+  const k=state.kids[kidId];
   k.tasks.forEach((t,idx)=>{
     const li=document.createElement("li");
     li.className="flex items-center justify-between p-3 rounded-xl border bg-white";
@@ -189,117 +160,83 @@ function renderKid(kidId){
         <span class="text-2xl">${t.icon}</span>
         <div>
           <div class="font-bold ${t.done?'line-through opacity-60':''}">${t.title}</div>
-          <div class="text-[11px] text-gray-500" id="hint-${kidId}-${t.id}">${t.ts?("完了 "+t.ts.slice(11,16)):""}</div>
+          <div class="text-[11px] text-gray-500" id="hint-${kidId}-${t.id}">${t.ts?('完了 '+t.ts.slice(11,16)):""}</div>
         </div>
       </div>
-      <button class="px-4 py-2 rounded-xl font-extrabold text-white ${t.done?'bg-gray-400':'bg-pink-500'}">
-        ${t.done?'もどす':'できた！'}
-      </button>
+      <button class="px-4 py-2 rounded-xl font-extrabold text-white ${t.done?'bg-gray-400':'bg-pink-500'}">${t.done?'もどす':'できた！'}</button>
     `;
-    const btn = li.querySelector("button");
+    const btn=li.querySelector("button");
     let lock=false;
     btn.onclick=()=>{
-      if(lock) return; lock=true; setTimeout(()=>lock=false, 500);
-      const nowIso = new Date().toISOString();
+      if(lock) return; lock=true; setTimeout(()=>lock=false,500);
+      const nowIso=new Date().toISOString();
       if(!t.done){
         t.done=true; t.ts=nowIso;
-        // 所要時間：直前タスクのtsとの差（無ければ開始を6:00とみなす）
-        const prev = (idx>0 ? k.tasks[idx-1].ts : new Date(new Date().setHours(6,0,0,0)).toISOString());
-        t.dur = Math.max(1, Math.floor((new Date(nowIso) - new Date(prev))/1000));
-        sfx("done"); sprinkleAt(li);
-        state.stars++;
+        const prev=(idx>0?k.tasks[idx-1].ts:new Date(new Date().setHours(START_HOUR,0,0,0)).toISOString());
+        t.dur=Math.max(1,Math.floor((new Date(nowIso)-new Date(prev))/1000));
+        state.stars++; sfx("done"); sprinkleAt(li);
       }else{
         t.done=false; t.ts=null; t.dur=null; sfx("click");
       }
-      save(); render();
-      if(allDone()){ onFinish(); }
+      save(); render(); if(allDone()) onFinish();
     };
     list.appendChild(li);
   });
-  const next = k.tasks.find(x=>!x.done);
-  document.getElementById("next"+kidId).textContent = next ? `次は「${next.title}」だよ！` : `全部できた！おつかれさま！`;
+  const next=k.tasks.find(x=>!x.done);
+  document.getElementById("next"+kidId).textContent = next?`次は「${next.title}」だよ！`:`全部できた！おつかれさま！`;
 }
 
-/* ==== 全体タイマー ==== */
+/* ========== タイマー（出発変更に対応） ========== */
 function tick(){
-  const target = new Date(); target.setHours(7,0,0,0); // 7:00（端末ローカル）
-  const rest = Math.max(0, Math.floor((target - now())/1000));
-  $count.textContent = fmtSec(rest);
-  const pct = Math.min(100, Math.max(0, rest / 3600 * 100));
-  $bar.style.width = pct + "%";
-  $bar.className = "h-3 " + (rest>1200?"bg-emerald-500":rest>600?"bg-yellow-400":"bg-red-500");
+  const {now:startNow,start,depart}=getWindow();
+  const rest=Math.max(0,Math.floor((depart-startNow)/1000));
+  $count.textContent=fmtSec(rest);
+  const total=depart-start, pct=Math.min(100,Math.max(0,rest/total*100));
+  $bar.style.width=pct+"%";
+  $bar.className="h-3 "+(rest>1200?"bg-emerald-500":rest>600?"bg-yellow-400":"bg-red-500");
+  $winHint.textContent=`時間の窓：${String(start.getHours()).padStart(2,'0')}:00 → ${state.depart}`;
 }
-setInterval(tick, 250);
+setInterval(tick,250);
 
-/* ==== 履歴 & グラフ ==== */
+/* ========== 履歴＆グラフ ========== */
 let chart;
-function refreshHistoryUI(){
-  const items = state.history.slice(-7);
-  if(items.length===0){
-    $hist.innerHTML = `<div class="text-gray-500">まだ履歴はありません。</div>`;
-    $stats.textContent = "平均 --:-- / 最速 --:--";
-  }else{
-    const avg = Math.round(items.reduce((a,x)=>a+x.totalSec,0)/items.length);
-    const best = items.reduce((a,x)=>x.totalSec<a.totalSec?x:a);
-    $stats.textContent = `平均 ${fmtSec(avg)} / 最速 ${fmtSec(best.totalSec)}（${best.date}）`;
-    $hist.innerHTML = items.slice().reverse().map(h=>{
-      return `<div class="py-1 border-b last:border-none">${h.date} 完了 ${h.finishedAt}（合計 ${fmtSec(h.totalSec)}）</div>`;
-    }).join("");
+function refreshHistory(){
+  const items=state.history.slice(-7);
+  if(items.length===0){$hist.innerHTML='<div class="text-gray-500">まだ履歴はありません。</div>'; $stats.textContent="平均 --:-- / 最速 --:--";}
+  else{
+    const avg=Math.round(items.reduce((a,x)=>a+x.totalSec,0)/items.length);
+    const best=items.reduce((a,x)=>x.totalSec<a.totalSec?x:a);
+    $stats.textContent=`平均 ${fmtSec(avg)} / 最速 ${fmtSec(best.totalSec)}（${best.date}）`;
+    $hist.innerHTML=items.slice().reverse().map(h=>`<div class="py-1 border-b last:border-none">${h.date} 完了 ${h.finishedAt}（合計 ${fmtSec(h.totalSec)}）</div>`).join("");
   }
-  // グラフ
-  const labels = state.history.slice(-7).map(x=>x.date);
-  const data   = state.history.slice(-7).map(x=>Math.round(x.totalSec/60)); // 分
-  const ctx2   = document.getElementById("histChart").getContext("2d");
+  const labels=state.history.slice(-7).map(x=>x.date);
+  const data=state.history.slice(-7).map(x=>Math.round(x.totalSec/60));
+  const ctx2=document.getElementById("histChart").getContext("2d");
   if(chart) chart.destroy();
-  chart = new Chart(ctx2, {
-    type: "bar",
-    data: {
-      labels,
-      datasets: [{
-        label: "合計時間（分）",
-        data,
-        backgroundColor: ["#f472b6","#facc15","#60a5fa","#34d399","#fb7185","#a78bfa","#10b981"]
-      }]
-    },
-    options: {
-      scales: {
-        y: { beginAtZero:true, ticks:{ stepSize:5 } }
-      },
-      plugins:{ legend:{ display:false } },
-      responsive:true,
-      maintainAspectRatio:false
-    }
-  });
+  chart=new Chart(ctx2,{type:"bar",data:{labels,datasets:[{label:"合計時間（分）",data,backgroundColor:["#f472b6","#facc15","#60a5fa","#34d399","#fb7185","#a78bfa","#10b981"]}]},options:{scales:{y:{beginAtZero:true,ticks:{stepSize:5}}},plugins:{legend:{display:false}},responsive:true,maintainAspectRatio:false}});
 }
-document.getElementById("clearHistory").onclick=()=>{
-  if(!confirm("履歴をすべて削除しますか？")) return;
-  state.history=[]; save(); refreshHistoryUI();
-};
+document.getElementById("clearHistory").onclick=()=>{ if(!confirm("履歴をすべて削除しますか？")) return; state.history=[]; save(); refreshHistory(); };
 
-/* ==== 完了判定 & ごほうび ==== */
-function allDone(){ return KIDS.every(k=>state.kids[k].tasks.every(t=>t.done)); }
+/* ========== 完了判定 & ごほうび ========== */
+function allDone(){return KIDS.every(k=>state.kids[k].tasks.every(t=>t.done))}
 function onFinish(){
   sfx("win"); burst();
-  $top.classList.remove("flash"); void $top.offsetWidth; $top.classList.add("flash"); // フラッシュ再生
-  // 履歴レコード（最初の完了〜最後の完了）
-  const times = KIDS.flatMap(k=>state.kids[k].tasks.map(t=>t.ts).filter(Boolean)).map(x=>new Date(x));
-  times.sort((a,b)=>a-b);
-  if(times.length){
-    const totalSec = Math.max(1, Math.floor((times[times.length-1] - times[0]) / 1000));
-    const rec = { date: new Date().toISOString().slice(0,10), finishedAt: new Date().toTimeString().slice(0,5), totalSec };
-    state.history.push(rec); save(); refreshHistoryUI();
-  }
+  $top.classList.remove("flash"); void $top.offsetWidth; $top.classList.add("flash");
+  const ts=KIDS.flatMap(k=>state.kids[k].tasks.map(t=>t.ts).filter(Boolean)).map(x=>new Date(x)).sort((a,b)=>a-b);
+  if(ts.length){const totalSec=Math.max(1,Math.floor((ts.at(-1)-ts[0])/1000)); const rec={date:new Date().toISOString().slice(0,10), finishedAt:new Date().toTimeString().slice(0,5), totalSec}; state.history.push(rec); save(); refreshHistory();}
 }
 
-/* ==== 全体描画 ==== */
-function render(){
+/* ========== イベント ========== */
+$depart.addEventListener("change",()=>{ state.depart = $depart.value || DEFAULT_DEPART; $subtitle.textContent=`${state.depart}までに準備しよう`; save(); tick(); });
+
+/* ========== 初期化 ========== */
+(function init(){
+  $depart.value = state.depart || DEFAULT_DEPART;
+  $subtitle.textContent = `${state.depart}までに準備しよう`;
   KIDS.forEach(k=>renderKid(k));
-  $stars.textContent = "⭐" + state.stars;
-  refreshHistoryUI();
-}
-
-/* ==== 初期化 ==== */
-render(); tick();
+  $stars.textContent = "⭐"+state.stars;
+  refreshHistory(); tick();
+})();
 </script>
 </body>
 </html>
