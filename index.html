@@ -3,111 +3,92 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-<title>朝ダッシュ！ | 兄弟で楽しくモーニング</title>
+<title>朝ダッシュ！</title>
+
+<!-- Tailwind（CDN） -->
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.10/dist/tailwind.min.css" rel="stylesheet">
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#4f46e5" />
 <style>
-  :root{
-    --bg:#fffef9; --card:#ffffff; --ink:#12131a; --muted:#767b85;
-    --accent:#4f46e5; --accent2:#22c55e; --danger:#ef4444;
-    --barbg:#eef0f3; --shadow:0 8px 22px rgba(0,0,0,.07);
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-  header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#fffef9 85%,#fff0);backdrop-filter:saturate(1.1) blur(4px);padding:10px 10px 6px;border-bottom:1px solid #f1f2f4}
-  .row{display:flex;gap:10px;align-items:center}
-  .space{justify-content:space-between}
-  h1{font-size:18px;margin:0}
-  .sub{font-size:12px;color:#667085}
-  .timer{font-variant-numeric:tabular-nums;font-size:28px;font-weight:800;letter-spacing:.3px}
-  .muted{color:var(--muted);font-size:12px}
-  .bar{height:8px;background:var(--barbg);border-radius:999px;overflow:hidden}
-  .bar > span{display:block;height:100%;background:var(--accent);width:0%}
-  .wrap{padding:10px;max-width:980px;margin:0 auto}
-  .card{background:var(--card);border:1px solid #eef0f3;border-radius:14px;box-shadow:var(--shadow);padding:10px;margin:8px 0}
-  .controls{gap:8px}
-  input[type=time]{font-size:15px;border:1px solid #e5e7eb;border-radius:10px;padding:6px}
-  button{appearance:none;border:0;border-radius:12px;padding:10px 14px;background:var(--accent);color:#fff;font-weight:800}
-  button.secondary{background:#e5e7eb;color:#111}
-  button.ghost{background:transparent;color:var(--muted)}
-  /* ---- 兄弟を常時2列 ---- */
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .kid{display:flex;flex-direction:column;gap:8px;min-height:100%}
-  .kid h2{font-size:15px;margin:2px 2px}
-  ul.tasks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
-  li.task{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;border:1px solid #eef0f3;border-radius:12px;padding:10px 12px;background:#fff}
-  .icon{font-size:20px;width:26px;text-align:center}
-  .title{font-weight:800;font-size:15px}
-  .due{font-size:11px;color:#374151;background:#f3f4f6;border-radius:999px;padding:3px 8px;margin-left:6px}
-  .done .title{text-decoration:line-through;opacity:.65}
-  .progress{height:6px;background:#f2f3f6;border-radius:999px;overflow:hidden;margin-top:6px}
-  .progress > span{display:block;height:100%;background:var(--accent2);width:0%}
-  .nav{font-size:11px;color:#0a0a0a;background:#eef7ff;border-left:4px solid #60a5fa;padding:6px 8px;border-radius:10px;margin-top:4px}
-  .btn-big{font-size:16px;padding:12px 14px;border-radius:14px;min-width:88px}
-  .star{font-size:18px}
+  :root{ --accent:#4f46e5; --ok:#10b981; --warn:#f59e0b; --bad:#ef4444; }
   .cele{position:fixed;inset:0;pointer-events:none}
-  .history{font-size:13px}
-  .weekly{display:flex;gap:8px;align-items:center}
-  .pill{font-size:12px;background:#f3f4f6;color:#111;border-radius:999px;padding:4px 10px}
+  .timer { font-variant-numeric: tabular-nums; }
+  .btn-big { min-width: 92px; }
 </style>
 </head>
-<body>
-  <header>
-    <div class="row space">
-      <div>
-        <h1>朝ダッシュ！</h1>
-        <div class="sub">7:00までに準備しよう</div>
-      </div>
-      <div class="row controls">
-        <label class="muted">出発</label>
-        <input type="time" id="departAt" />
-        <button class="secondary" id="resetDay">今日の進捗リセット</button>
-      </div>
+<body class="bg-slate-50 text-slate-900">
+<header class="sticky top-0 z-10 bg-white/80 backdrop-blur border-b">
+  <div class="max-w-5xl mx-auto px-3 py-2 flex items-center justify-between">
+    <div>
+      <h1 class="text-lg font-extrabold tracking-tight">朝ダッシュ！</h1>
+      <p class="text-xs text-slate-500">7:00までに準備しよう</p>
     </div>
-    <div class="card">
-      <div class="row space">
+    <div class="flex items-center gap-2">
+      <label class="text-xs text-slate-500">出発</label>
+      <input type="time" id="departAt"
+             class="rounded-lg border px-2 py-1 text-sm" />
+      <button id="resetDay" class="rounded-lg bg-slate-200 px-3 py-1 text-sm font-bold">今日リセット</button>
+    </div>
+  </div>
+  <div class="max-w-5xl mx-auto px-3 pb-2">
+    <div class="rounded-xl border bg-white p-3">
+      <div class="flex items-center justify-between">
         <div>
-          <div class="muted">出発まで</div>
-          <div id="countdown" class="timer">--:--</div>
+          <div class="text-xs text-slate-500">出発まで</div>
+          <div id="countdown" class="timer text-3xl font-extrabold text-slate-900">--:--</div>
         </div>
-        <div class="row weekly">
-          <div class="star" id="stars">⭐ 0</div>
-          <div class="pill" id="weekly">今週：⭐ 0 / 7</div>
-          <div id="crown" style="font-size:20px;display:none">👑</div>
+        <div class="flex items-center gap-2">
+          <div id="stars" class="text-lg">⭐ 0</div>
+          <div id="weekly" class="text-xs px-2 py-1 rounded-full bg-slate-100">今週：⭐ 0 / 7</div>
+          <div id="crown" class="text-2xl hidden">👑</div>
         </div>
       </div>
-      <div class="bar" aria-label="残り時間"><span id="timeBar"></span></div>
-      <div class="muted" id="windowHint" style="margin-top:6px"></div>
-    </div>
-  </header>
-
-  <main class="wrap">
-    <div class="grid2">
-      <section class="kid card" id="kidA">
-        <h2>おねえちゃん</h2>
-        <ul class="tasks" id="tasksA"></ul>
-        <div class="nav" id="nextA">次は —</div>
-      </section>
-      <section class="kid card" id="kidB">
-        <h2>おとうと</h2>
-        <ul class="tasks" id="tasksB"></ul>
-        <div class="nav" id="nextB">次は —</div>
-      </section>
-    </div>
-
-    <section class="card">
-      <h3 style="margin:6px 2px">履歴</h3>
-      <div class="history" id="history"></div>
-      <div class="row" style="margin-top:8px;justify-content:flex-end">
-        <button class="ghost" id="clearHistory">履歴を全消去</button>
+      <div class="h-2 w-full bg-slate-100 rounded-full overflow-hidden mt-2">
+        <span id="timeBar" class="block h-full bg-indigo-600 w-0"></span>
       </div>
+      <div id="windowHint" class="text-xs text-slate-500 mt-1"></div>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-5xl mx-auto p-3 space-y-3">
+  <!-- 2列 -->
+  <div class="grid grid-cols-2 gap-3">
+    <!-- Kid A -->
+    <section class="rounded-xl border bg-white p-3">
+      <h2 class="font-bold mb-2">おねえちゃん</h2>
+      <ul id="tasksA" class="space-y-2"></ul>
+      <div id="nextA" class="text-xs px-2 py-1 mt-2 rounded-lg bg-blue-50 border-l-4 border-blue-300">次は —</div>
     </section>
-  </main>
 
-  <canvas id="cele" class="cele"></canvas>
+    <!-- Kid B -->
+    <section class="rounded-xl border bg-white p-3">
+      <h2 class="font-bold mb-2">おとうと</h2>
+      <ul id="tasksB" class="space-y-2"></ul>
+      <div id="nextB" class="text-xs px-2 py-1 mt-2 rounded-lg bg-blue-50 border-l-4 border-blue-300">次は —</div>
+    </section>
+  </div>
 
+  <!-- 履歴 -->
+  <section class="rounded-xl border bg-white p-3">
+    <div class="flex items-center justify-between">
+      <h3 class="font-bold">履歴（直近7日）</h3>
+      <div class="text-xs text-slate-600" id="stats">平均 --:-- / 最速 --:--</div>
+    </div>
+    <div id="history" class="mt-2 divide-y"></div>
+    <div class="flex justify-end mt-2">
+      <button id="clearHistory" class="text-slate-500 text-sm">履歴を全消去</button>
+    </div>
+  </section>
+</main>
+
+<canvas id="cele" class="cele"></canvas>
+
+<!-- ======= Script ======= -->
 <script>
-/* ====== 設定・初期値 ====== */
-const KEY="asadash_v7";
+/*** 基本設定 ***/
+const KEY="asadash_v8";
 const START_HOUR=6;
 const DEFAULT_DEPART="07:00";
 const TASKS_DEF=[
@@ -118,38 +99,29 @@ const TASKS_DEF=[
 ];
 const KIDS=["A","B"];
 
-/* ====== JSTユーティリティ ====== */
-const JST_OFFSET = 9 * 60; // minutes
-function nowJST(){
-  const now = new Date();
-  const utcMs = now.getTime() + now.getTimezoneOffset()*60000;
-  return new Date(utcMs + JST_OFFSET*60000);
-}
-function dateAtJST(hh,mm, baseDate){
-  const d = baseDate ? new Date(baseDate) : nowJST();
-  const j = new Date(d.getTime()); j.setHours(hh, mm, 0, 0); return j;
-}
+/*** JSTユーティリティ ***/
+const JST_OFFSET = 9*60;
+function nowJST(){ const n=new Date(); const utc=n.getTime()+n.getTimezoneOffset()*60000; return new Date(utc+JST_OFFSET*60000); }
+function dateAtJST(h,m,base){ const d=base?new Date(base):nowJST(); d.setHours(h,m,0,0); return d; }
 function parseHM(hm){ const [h,m]=hm.split(":").map(Number); return {h,m}; }
-function fmtHM(d){const h=String(d.getHours()).padStart(2,"0"), m=String(d.getMinutes()).padStart(2,"0"); return `${h}:${m}`;}
-function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+function fmtHM(d){ return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+function hmToMin(hm){ const [h,m]=hm.split(":").map(Number); return h*60+m; }
 
-/* ====== 週キー（JST・月曜開始） ====== */
+/*** 週キー（JST / 月曜開始） ***/
 function weekKeyJST(d){
-  const date = new Date(d.getTime());
-  const day = (date.getDay()+6)%7; // Mon=0
-  const monday = new Date(date); monday.setDate(date.getDate()-day);
-  const y = monday.getFullYear();
-  const m = String(monday.getMonth()+1).padStart(2,'0');
-  const dd= String(monday.getDate()).padStart(2,'0');
-  return `${y}-W${m}${dd}`;
+  const dd = new Date(d.getTime());
+  const day = (dd.getDay()+6)%7; // Mon=0
+  const mon = new Date(dd); mon.setDate(dd.getDate()-day);
+  return mon.toISOString().slice(0,10); // 週の月曜日の日付
 }
 
-/* ====== 状態 ====== */
-const todayStr=()=>{const d=nowJST(); return d.toISOString().slice(0,10)};
+/*** 状態 ***/
+const todayStr=()=>nowJST().toISOString().slice(0,10);
 const dayKey=()=>`${KEY}:${todayStr()}`;
+function baseTasks(){ return TASKS_DEF.map(t=>({...t, done:false, p:0, ts:null, dur:null})) }
 function defaultState(){
-  const baseTasks=()=>TASKS_DEF.map(t=>({...t, done:false, p:0, ts:null}));
-  const wk = { key: weekKeyJST(nowJST()), count: 0 };
+  const wk = {key:weekKeyJST(nowJST()), count:0};
   const savedWk = JSON.parse(localStorage.getItem(KEY+":week")||"null");
   const week = (savedWk && savedWk.key===wk.key) ? savedWk : wk;
   return {
@@ -157,207 +129,308 @@ function defaultState(){
     stars: Number(localStorage.getItem(KEY+":stars")||0),
     week,
     kids:{
-      A:{ name:"おねえちゃん", tasks:baseTasks(), startedAt:null, finishedAt:null },
-      B:{ name:"おとうと",     tasks:baseTasks(), startedAt:null, finishedAt:null },
+      A:{name:"おねえちゃん", tasks:baseTasks(), startedAt:null, finishedAt:null, best:{}},
+      B:{name:"おとうと",     tasks:baseTasks(), startedAt:null, finishedAt:null, best:{}},
     },
-    history: JSON.parse(localStorage.getItem(KEY+":history")||"[]"),
-    best: JSON.parse(localStorage.getItem(KEY+":best")||"null"),
+    history: JSON.parse(localStorage.getItem(KEY+":history")||"[]"), // [{date, finishedAt, totalSec, kids:{A:[{id, time, durSec}],B:...}}]
+    bestDay: JSON.parse(localStorage.getItem(KEY+":bestDay")||"null"), // {date, finishedAt, totalSec}
   };
 }
 let state = JSON.parse(localStorage.getItem(dayKey())||"null") || defaultState();
 
-/* ====== DOM ====== */
-const $depart=document.getElementById("departAt");
-const $count=document.getElementById("countdown");
-const $bar=document.getElementById("timeBar");
-const $hint=document.getElementById("windowHint");
-const $stars=document.getElementById("stars");
-const $weekly=document.getElementById("weekly");
-const $crown=document.getElementById("crown");
-const $tasksA=document.getElementById("tasksA");
-const $tasksB=document.getElementById("tasksB");
-const $nextA=document.getElementById("nextA");
-const $nextB=document.getElementById("nextB");
-const $hist=document.getElementById("history");
-const $reset=document.getElementById("resetDay");
-const $clearHist=document.getElementById("clearHistory");
+/*** DOM ***/
+const $depart = document.getElementById("departAt");
+const $count  = document.getElementById("countdown");
+const $bar    = document.getElementById("timeBar");
+const $hint   = document.getElementById("windowHint");
+const $stars  = document.getElementById("stars");
+const $weekly = document.getElementById("weekly");
+const $crown  = document.getElementById("crown");
+const $tasksA = document.getElementById("tasksA");
+const $tasksB = document.getElementById("tasksB");
+const $nextA  = document.getElementById("nextA");
+const $nextB  = document.getElementById("nextB");
+const $hist   = document.getElementById("history");
+const $stats  = document.getElementById("stats");
 
-/* ====== 保存 ====== */
+/*** 保存 ***/
 function persist(){
   localStorage.setItem(dayKey(), JSON.stringify(state));
   localStorage.setItem(KEY+":lastDepart", state.depart);
   localStorage.setItem(KEY+":stars", String(state.stars));
   localStorage.setItem(KEY+":history", JSON.stringify(state.history));
-  localStorage.setItem(KEY+":best", JSON.stringify(state.best));
+  localStorage.setItem(KEY+":bestDay", JSON.stringify(state.bestDay));
   localStorage.setItem(KEY+":week", JSON.stringify(state.week));
 }
 
-/* ====== タスク描画 ====== */
+/*** ウィンドウ（6:00→出発、過ぎたら翌日に回す） ***/
+function getWindowDates(){
+  const now = nowJST();
+  const {h:dh,m:dm}=parseHM(state.depart);
+  let depart = dateAtJST(dh,dm,now);
+  let start  = dateAtJST(START_HOUR,0,now);
+  if (now > depart){ depart = new Date(depart.getTime()+86400000); start = new Date(start.getTime()+86400000); }
+  return {now,start,depart};
+}
+
+/*** タスクリスト描画（各行：残り時間／Best表示・0.5sデバウンス） ***/
+function taskRow(kidId, t, onToggle){
+  const wrap = document.createElement("li");
+  wrap.className = "flex items-center justify-between p-2 border rounded-lg";
+  const bestDur = state.kids[kidId].best[t.id]; // 秒
+  const bestBadge = bestDur!=null ? `<span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Best ${fmtSec(bestDur)}</span>` : "";
+  wrap.innerHTML = `
+    <div class="flex items-center gap-3">
+      <div class="text-xl">${t.icon}</div>
+      <div>
+        <div class="font-bold ${t.done?'line-through opacity-60':''}">
+          ${t.title}
+          <span class="ml-2 text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">〜${t.due}</span>
+          ${bestBadge}
+        </div>
+        <div class="text-[11px] mt-1">
+          <span class="px-1.5 py-0.5 rounded bg-slate-50 border" id="left-${kidId}-${t.id}">あと --:--</span>
+          <span class="ml-2 text-slate-500" id="when-${kidId}-${t.id}">${t.ts? "完了 "+t.ts.slice(11,16): ""}</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <button class="btn-big rounded-xl px-3 py-2 font-extrabold ${t.done?'bg-slate-300 text-slate-700':'bg-indigo-600 text-white'}"
+              data-kid="${kidId}" data-id="${t.id}">${t.done?'もどす':'できた！'}</button>
+    </div>
+  `;
+  const btn = wrap.querySelector("button");
+  let locked = false;
+  btn.addEventListener("click", ()=>{
+    if(locked) return;
+    locked = true; btn.disabled = true; setTimeout(()=>{locked=false; btn.disabled=false;}, 500); // 多重押し防止
+    onToggle();
+  });
+  return wrap;
+}
+
+/*** 残り時間（各タスク）：常時表示 ***/
+function updateTaskLeftBadges(){
+  const {now} = getWindowDates();
+  KIDS.forEach(kid=>{
+    state.kids[kid].tasks.forEach(t=>{
+      const el = document.getElementById(`left-${kid}-${t.id}`);
+      if(!el) return;
+      const d = dateAtJST(...Object.values(parseHM(t.due)), now);
+      let ms = d - now; // 期限まで
+      const neg = ms<0; if(neg) ms = -ms;
+      const m = Math.floor(ms/60000), s = Math.floor((ms%60000)/1000);
+      el.textContent = `${neg?'-':''}${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      // 色分け（タスク個別）
+      el.classList.remove("bg-emerald-50","bg-amber-50","bg-rose-50","text-emerald-700","text-amber-700","text-rose-700");
+      const remainMin = (d - now)/60000;
+      if(remainMin > 20) { el.classList.add("bg-emerald-50","text-emerald-700"); }
+      else if(remainMin > 10){ el.classList.add("bg-amber-50","text-amber-700"); }
+      else { el.classList.add("bg-rose-50","text-rose-700"); }
+    });
+  });
+}
+
+/*** レンダリング ***/
 function renderKid(kidId, $list, $next){
   $list.innerHTML="";
-  const k=state.kids[kidId];
-  k.tasks.forEach((t)=>{
-    const li=document.createElement("li"); li.className="task"+(t.done?" done":"");
-    li.innerHTML=`
-      <div class="icon">${t.icon}</div>
-      <div>
-        <div class="title">${t.title}<span class="due">〜${t.due}</span></div>
-        <div class="progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${t.p}"><span style="width:${t.p}%"></span></div>
-      </div>
-      <div><button class="secondary btn-big" data-act="toggle">${t.done?"もどす":"できた！"}</button></div>
-    `;
-    li.querySelector("button").addEventListener("click",()=>{
+  const k = state.kids[kidId];
+  k.tasks.forEach((t,idx)=>{
+    const row = taskRow(kidId, t, ()=>{
       const now = nowJST();
-      if (!k.startedAt) k.startedAt=now.toISOString();
-      t.done=!t.done; t.p=t.done?100:0; t.ts = t.done ? now.toISOString() : null;
-      sfx("done"); sprinkle(li);
+      if (!k.startedAt) k.startedAt = now.toISOString();
+      // toggle
+      if(!t.done){
+        t.done = true;
+        t.p = 100;
+        t.ts = now.toISOString();
+        // 所要時間（前タスクからの差 or START_HOURから）
+        const prevTs = (idx>0 ? k.tasks[idx-1].ts : dateAtJST(START_HOUR,0,now).toISOString());
+        t.dur = Math.max(1, Math.floor((new Date(t.ts) - new Date(prevTs))/1000));
+        // ベスト更新
+        const best = k.best[t.id];
+        if (best==null || t.dur < best){ k.best[t.id] = t.dur; sfx("best"); sprinkle(row); }
+        else { sfx("done"); sprinkle(row); }
+      }else{
+        // 戻す
+        t.done = false; t.p=0; t.ts=null; t.dur=null;
+        sfx("click");
+      }
+      // 次ナビ
       const next = k.tasks.find(x=>!x.done);
       $next.textContent = next ? `次は「${next.title}」だよ！` : `全部できた！おつかれさま！`;
+      // 全員完了？
       if (allKidsDone()){ celebrate(); recordHistory(); }
-      persist(); render();
+      persist(); render(); // 再描画
     });
-    $list.appendChild(li);
+    $list.appendChild(row);
   });
-  const nxt=k.tasks.find(x=>!x.done);
+  // 初期ナビ
+  const nxt = k.tasks.find(x=>!x.done);
   $next.textContent = nxt ? `次は「${nxt.title}」だよ！` : `全部できた！おつかれさま！`;
 }
 
 function renderHistory(){
-  const items = state.history.slice(-7).reverse();
-  if (items.length===0){ $hist.textContent="まだ履歴はありません。"; return; }
-  $hist.innerHTML = items.map(h=>{
-    const bestBadge = (state.best && state.best.finishedAt===h.finishedAt) ? " 🏆ベスト" : "";
-    return `<div style="padding:6px 0;border-bottom:1px dashed #eee">
-      <div><strong>${h.date}</strong> 完了 ${h.finishedAt}${bestBadge}</div>
-      <div class="muted">おねえちゃん: ${h.kids.A.map(x=>`${x.id}:${x.time}`).join(" / ")}</div>
-      <div class="muted">おとうと: ${h.kids.B.map(x=>`${x.id}:${x.time}`).join(" / ")}</div>
+  const items = state.history.slice(-7);
+  if(items.length===0){ $hist.innerHTML = `<div class="text-sm text-slate-500">まだ履歴はありません。</div>`; $stats.textContent="平均 --:-- / 最速 --:--"; return; }
+  // 集計
+  const avg = Math.round(items.reduce((a,x)=>a+x.totalSec,0)/items.length);
+  const best = items.reduce((a,x)=> x.totalSec < a.totalSec ? x : a);
+  $stats.textContent = `平均 ${fmtSec(avg)} / 最速 ${fmtSec(best.totalSec)}（${best.date}）`;
+
+  $hist.innerHTML = items.reverse().map(h=>{
+    const rowKid = kid => `<div class="text-xs text-slate-600">
+      ${kid}: ${h.kids[kid].map(x=>`${x.id}=${x.time}(${fmtSec(x.durSec)})`).join(" / ")}
+    </div>`;
+    const bestMark = (state.bestDay && state.bestDay.date===h.date) ? ' <span class="text-emerald-600">🏆</span>' : '';
+    return `<div class="py-2 text-sm">
+      <div class="font-bold">${h.date} 完了 ${h.finishedAt}${bestMark}（合計 ${fmtSec(h.totalSec)}）</div>
+      ${rowKid('A')}
+      ${rowKid('B')}
     </div>`;
   }).join("");
 }
 
 function render(){
+  // 週補正
   const wk = weekKeyJST(nowJST());
   if (state.week.key !== wk){ state.week = {key:wk, count:0}; }
-  $depart.value = state.depart;
-  $stars.textContent = `⭐ ${state.stars}`;
-  $weekly.textContent = `今週：⭐ ${state.week.count} / 7`;
-  $crown.style.display = state.week.count>=7 ? "block" : "none";
-  renderKid("A",$tasksA,$nextA);
-  renderKid("B",$tasksB,$nextB);
+  document.getElementById("departAt").value = state.depart;
+  document.getElementById("stars").textContent = `⭐ ${state.stars}`;
+  document.getElementById("weekly").textContent = `今週：⭐ ${state.week.count} / 7`;
+  document.getElementById("crown").classList.toggle("hidden", !(state.week.count>=7));
+  renderKid("A", $tasksA, $nextA);
+  renderKid("B", $tasksB, $nextB);
   renderHistory();
+  updateTaskLeftBadges();
 }
 
-/* ====== 6:00 → 出発（JST）。出発を過ぎていたら翌日にロールオーバー ====== */
-function getWindowDates(){
-  const now = nowJST();
-  const {h:dh, m:dm} = parseHM(state.depart);
-  let depart = dateAtJST(dh, dm, now);
-  let start  = dateAtJST(START_HOUR, 0, now);
-  if (now > depart) { // 夜に開いても巨大マイナスにしない
-    depart = new Date(depart.getTime() + 24*3600*1000);
-    start  = new Date(start.getTime()  + 24*3600*1000);
-  }
-  return {now, start, depart};
-}
-
-/* ====== カウントダウン＆ゲージ ====== */
+/*** 全体タイマー色分け ***/
 function timerTick(){
-  const {now, start, depart} = getWindowDates();
-  const ms = depart - now; // ロールオーバー済だから >=0
-  const m = Math.floor(ms/60000);
-  const s = Math.floor((ms%60000)/1000);
-  $count.textContent = `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  const {now,start,depart} = getWindowDates();
+  const ms = depart - now; // >=0
+  const m = Math.floor(ms/60000), s=Math.floor((ms%60000)/1000);
+  $count.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   const total = depart - start;
   const pct = clamp((ms/total)*100, 0, 100);
   $bar.style.width = `${pct}%`;
-  $hint.textContent = `いまの時間の窓：${fmtHM(start)} → ${fmtHM(depart)}（JST / 出発は変更可）`;
+  // 色
+  $bar.classList.remove("bg-emerald-500","bg-amber-500","bg-rose-500","bg-indigo-600");
+  if (m>20) $bar.classList.add("bg-emerald-500");
+  else if (m>10) $bar.classList.add("bg-amber-500");
+  else $bar.classList.add("bg-rose-500");
+  $hint.textContent = `時間の窓：${fmtHM(start)} → ${fmtHM(depart)}（JST / 出発は変更可）`;
+  updateTaskLeftBadges();
 }
 setInterval(timerTick, 250);
 
-/* ====== 効果音・演出（派手め） ====== */
+/*** 効果音（合成音：混在ランダムパターン・固定音量） ***/
 let audioCtx;
-function sfx(type="click"){
+function sfx(kind="click"){
   try{
     audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
-    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
-    o.connect(g); g.connect(audioCtx.destination);
-    const tones = {done:[660,740,830,990,1110], win:[880,1040,1240,1480], click:[520,600,680]};
-    const f = (tones[type]||[600])[Math.floor(Math.random()* (tones[type]||[600]).length)];
-    o.frequency.value = f; g.gain.value=.08;
-    const t=audioCtx.currentTime; const dur = type==="win" ? 0.26 : 0.12;
-    o.start(t); o.stop(t+dur);
+    const t0=audioCtx.currentTime;
+    const gain = audioCtx.createGain(); gain.gain.value=0.08; gain.connect(audioCtx.destination);
+    function tone(f, t, dur, type="sine"){
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type=type; o.frequency.value=f; o.connect(g); g.connect(gain);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.25, t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+      o.start(t); o.stop(t+dur+0.02);
+    }
+    function sparkle(t){ tone(1400,t,0.08,"triangle"); tone(1700,t+0.06,0.07,"triangle"); tone(2000,t+0.12,0.06,"triangle"); }
+    function coin(t){ tone(880,t,0.08,"square"); tone(1320,t+0.08,0.10,"square"); }
+    function ping(t){ tone(990,t,0.12,"sine"); }
+    function chordWin(t){ tone(660,t,0.18,"sawtooth"); tone(880,t,0.18,"sawtooth"); tone(1100,t,0.18,"sawtooth"); }
+    const patterns = {
+      click: (t)=>ping(t),
+      done:  (t)=>{ if(Math.random()<0.5) sparkle(t); else coin(t); },
+      best:  (t)=>{ sparkle(t); coin(t+0.18); },
+      win:   (t)=>{ chordWin(t); sparkle(t+0.2); coin(t+0.35); }
+    };
+    (patterns[kind]||patterns.click)(t0);
   }catch(e){}
 }
+
+/*** コンフェッティ（派手） ***/
 const canvas=document.getElementById("cele"); const ctx=canvas.getContext("2d");
 function resize(){ canvas.width=innerWidth; canvas.height=innerHeight } addEventListener("resize",resize); resize();
 let parts=[];
 function sprinkle(el){
-  const r=el.getBoundingClientRect();
-  const x=r.left+r.width/2, y=r.top+scrollY;
-  for(let i=0;i<32;i++){
+  const r=el.getBoundingClientRect(); const x=r.left+r.width/2; const y=r.top+scrollY;
+  for(let i=0;i<40;i++){
     parts.push({x,y,vx:(Math.random()-0.5)*5,vy:Math.random()*-6-2,g:.18,size:Math.random()*5+2,color:["#facc15","#60a5fa","#34d399","#fb7185","#a78bfa","#f472b6","#10b981"][i%7],ttl:110});
   }
 }
 function burstCenter(){
-  const x=innerWidth/2, y=84;
-  for(let i=0;i<200;i++){
+  const x=innerWidth/2, y=96;
+  for(let i=0;i<220;i++){
     parts.push({x,y,vx:(Math.random()-0.5)*8,vy:Math.random()*-8-2,g:.12,size:Math.random()*6+3,color:["#facc15","#60a5fa","#34d399","#fb7185","#a78bfa","#f472b6","#10b981"][i%7],ttl:180});
   }
 }
 function anim(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  parts.forEach(p=>{
-    p.ttl--; p.vy+=p.g; p.x+=p.vx; p.y+=p.vy;
-    ctx.fillStyle=p.color; ctx.fillRect(p.x,p.y,p.size,p.size);
-  });
+  parts.forEach(p=>{ p.ttl--; p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; ctx.fillStyle=p.color; ctx.fillRect(p.x,p.y,p.size,p.size); });
   parts = parts.filter(p=>p.ttl>0 && p.y<canvas.height+30);
   requestAnimationFrame(anim);
 }
 anim();
 
-/* ====== 完了判定・履歴・週ごほうび ====== */
+/*** 判定・履歴・週ごほうび ***/
 function allKidsDone(){ return KIDS.every(k=>state.kids[k].tasks.every(t=>t.done)); }
 function celebrate(){
   state.stars += 1;
   const wk = weekKeyJST(nowJST());
-  if (state.week.key !== wk){ state.week = {key:wk, count:0}; }
-  state.week.count = Math.min(7, state.week.count + 1);
+  if (state.week.key !== wk) state.week = {key:wk, count:0};
+  state.week.count = Math.min(7, state.week.count+1);
   sfx("win"); burstCenter();
-  if (state.week.count>=7){ $crown.style.display="block"; }
+  if (state.week.count>=7) $crown.classList.remove("hidden");
 }
+function fmtSec(sec){ const m=Math.floor(sec/60), s=sec%60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
 function recordHistory(){
   const now = nowJST();
+  // kid別・タスク別
   const recKids = {};
+  let firstStart = dateAtJST(START_HOUR,0,now); // 全体開始
+  let lastDone = now;
   KIDS.forEach(kid=>{
     const k=state.kids[kid];
     k.finishedAt = k.finishedAt || now.toISOString();
-    recKids[kid] = k.tasks.map(t=>({id:t.id, time: t.ts ? t.ts.slice(11,16) : "--:--"}));
+    recKids[kid] = k.tasks.map(t=>({id:t.id, time: t.ts? t.ts.slice(11,16) : "--:--", durSec: t.dur||0}));
   });
-  const finishedHM = fmtHM(now);
-  const rec = {date: todayStr(), finishedAt: finishedHM, kids: recKids};
+  // 合計秒（最初のtask.ts最小〜最後のtask.ts最大）
+  const allTs = KIDS.flatMap(kid=>state.kids[kid].tasks.map(t=>t.ts).filter(Boolean)).map(x=>new Date(x));
+  if(allTs.length){ firstStart = new Date(Math.min(...allTs)); lastDone = new Date(Math.max(...allTs)); }
+  const totalSec = Math.max(1, Math.floor((lastDone - firstStart)/1000));
+  const rec = {date: todayStr(), finishedAt: fmtHM(now), totalSec, kids: recKids};
   state.history.push(rec);
-  const toMin=hm=>{const [h,m]=hm.split(":").map(Number); return h*60+m;}
-  if (!state.best || toMin(finishedHM) < toMin(state.best.finishedAt)){
-    state.best = {date: rec.date, finishedAt: finishedHM};
-  }
-  persist(); renderHistory(); render();
+  if (!state.bestDay || totalSec < state.bestDay.totalSec){ state.bestDay = {date: rec.date, finishedAt: rec.finishedAt, totalSec}; }
+  persist(); renderHistory();
 }
 
-/* ====== イベント ====== */
-$depart.addEventListener("change",()=>{ state.depart = $depart.value || DEFAULT_DEPART; persist(); timerTick(); });
-$reset.addEventListener("click",()=>{
+/*** イベント ***/
+document.getElementById("departAt").addEventListener("change",()=>{ state.depart=$depart.value||DEFAULT_DEPART; persist(); timerTick(); });
+document.getElementById("resetDay").addEventListener("click",()=>{
   if(!confirm("今日の進捗をリセットしますか？")) return;
   ["A","B"].forEach(kid=>{
     const k=state.kids[kid];
-    k.tasks = TASKS_DEF.map(t=>({...t, done:false, p:0, ts:null}));
+    k.tasks = baseTasks();
     k.startedAt=null; k.finishedAt=null;
   });
   persist(); render();
 });
-$clearHist.addEventListener("click",()=>{ if(!confirm("履歴をすべて削除しますか？")) return; state.history=[]; state.best=null; persist(); renderHistory(); });
+document.getElementById("clearHistory").addEventListener("click",()=>{
+  if(!confirm("履歴をすべて削除しますか？")) return;
+  state.history=[]; state.bestDay=null; persist(); renderHistory();
+});
 
-/* ====== 初期描画 ====== */
-(function init(){ if (!state.depart) state.depart = DEFAULT_DEPART; persist(); render(); timerTick(); })();
+/*** 初期化 ***/
+(function init(){
+  if(!state.depart) state.depart = DEFAULT_DEPART;
+  persist(); render(); timerTick();
+  if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+})();
 </script>
 </body>
 </html>
