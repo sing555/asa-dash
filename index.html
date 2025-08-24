@@ -13,7 +13,6 @@
   .flash{animation:flash-bg .9s ease-in-out}
   @keyframes flash-bg{0%{background:rgba(255,255,0,0)}25%{background:rgba(255,255,0,.35)}100%{background:rgba(255,255,0,0)}}
   #cele{position:fixed;inset:0;pointer-events:none;z-index:50}
-  /* ランドスケープ最適化 */
   @media (orientation:landscape){
     header{padding:.5rem 1rem}
     header h1{font-size:1.25rem}
@@ -21,9 +20,10 @@
     #topWrap{padding:.5rem 1rem}
     #topCard{padding:.5rem 1rem}
     #mainGrid{grid-template-columns:1fr 1fr; gap:var(--gap); padding:0 1rem 1rem}
-    .kidCard{max-height:calc(100svh - 144px); overflow:auto} /* タイマー分を差し引き */
+    .kidCard{max-height:calc(100svh - 144px); overflow:auto}
     .btn{min-height:44px}
   }
+  dialog::backdrop{background:rgba(0,0,0,.25)}
 </style>
 </head>
 <body class="bg-gradient-to-br from-yellow-50 to-pink-50 text-gray-900" id="shell">
@@ -34,14 +34,13 @@
       <h1 class="text-2xl font-extrabold">🎉 朝ダッシュ！</h1>
       <span id="subtitle" class="text-sm opacity-90">7:00までに準備しよう</span>
     </div>
-    <div class="flex items-center gap-3 text-[13px]">
-      <div class="flex items-center gap-1">
-        <span class="opacity-80">開始</span>
-        <input type="time" id="startAt" class="rounded-lg border px-2 py-1 text-gray-900">
+    <div class="flex items-center gap-2">
+      <button id="soundBtn" class="px-3 py-1 rounded-lg bg-white/20 hover:bg-white/30 text-sm font-bold">🔊 サウンド</button>
+      <div class="flex items-center gap-1 text-[13px]">
+        <span class="opacity-80">開始</span><input type="time" id="startAt" class="rounded-lg border px-2 py-1 text-gray-900">
       </div>
-      <div class="flex items-center gap-1">
-        <span class="opacity-80">出発</span>
-        <input type="time" id="departAt" class="rounded-lg border px-2 py-1 text-gray-900">
+      <div class="flex items-center gap-1 text-[13px]">
+        <span class="opacity-80">出発</span><input type="time" id="departAt" class="rounded-lg border px-2 py-1 text-gray-900">
       </div>
     </div>
   </div>
@@ -65,19 +64,16 @@
 </section>
 
 <main id="mainGrid" class="max-w-6xl mx-auto mt-4 px-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-
   <section class="kidCard rounded-2xl bg-white shadow p-4" id="kidA">
     <h2 class="text-lg font-black mb-3 text-pink-600">👧 おねえちゃん</h2>
     <ul id="tasksA" class="space-y-3"></ul>
     <div id="nextA" class="mt-3 text-sm text-indigo-600 font-bold"></div>
   </section>
-
   <section class="kidCard rounded-2xl bg-white shadow p-4" id="kidB">
     <h2 class="text-lg font-black mb-3 text-yellow-600">👦 おとうと</h2>
     <ul id="tasksB" class="space-y-3"></ul>
     <div id="nextB" class="mt-3 text-sm text-indigo-600 font-bold"></div>
   </section>
-
 </main>
 
 <section class="max-w-6xl mx-auto mt-4 px-4">
@@ -94,11 +90,45 @@
   </details>
 </section>
 
+<!-- サウンド設定モーダル（v9.4と同じなので省略しません。動作そのまま） -->
+<dialog id="soundDlg" class="rounded-2xl p-0 w-[92%] max-w-md">
+  <div class="p-4 border-b font-bold">🔊 サウンド設定</div>
+  <div class="p-4 space-y-4">
+    <div class="flex items-center justify-between">
+      <label class="font-medium">音量</label>
+      <div class="flex items-center gap-2">
+        <input id="vol" type="range" min="0" max="100" value="55">
+        <button id="mute" class="px-2 py-1 rounded bg-slate-200 text-sm">ミュート</button>
+      </div>
+    </div>
+    <div>
+      <div class="font-medium mb-1">テーマ</div>
+      <div class="flex gap-2">
+        <label class="flex items-center gap-1 text-sm"><input type="radio" name="theme" value="pop" checked> Pop</label>
+        <label class="flex items-center gap-1 text-sm"><input type="radio" name="theme" value="8bit"> 8bit</label>
+        <label class="flex items-center gap-1 text-sm"><input type="radio" name="theme" value="party"> Party</label>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button id="test-done" class="px-3 py-2 rounded bg-pink-500 text-white text-sm">「できた！」試聴</button>
+      <button id="test-win" class="px-3 py-2 rounded bg-emerald-600 text-white text-sm">「全部できた」試聴</button>
+    </div>
+  </div>
+  <div class="p-3 bg-slate-50 border-t flex justify-end gap-2">
+    <button id="closeDlg" class="px-3 py-1 rounded bg-slate-200 text-sm">閉じる</button>
+  </div>
+</dialog>
+
 <canvas id="cele"></canvas>
 
 <script>
+/* ===== 共通：JSTフォーマッタ ===== */
+const JST = 'Asia/Tokyo';
+const fmtTimeJST = (ts)=> new Intl.DateTimeFormat('ja-JP',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:JST}).format(new Date(ts));
+const fmtDateJST = (ts)=> new Intl.DateTimeFormat('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',timeZone:JST}).format(new Date(ts)).replace(/\//g,'-');
+
 /* ===== 設定 / 状態 ===== */
-const KEY="asadash_v9_3";
+const KEY="asadash_v9_5"; // ←キー更新（安全に移行）
 const DEFAULT_START="06:00";
 const DEFAULT_DEPART="07:00";
 const TASKS=[
@@ -109,14 +139,43 @@ const TASKS=[
 ];
 const KIDS=["A","B"];
 const cloneTasks=()=>TASKS.map(t=>({...t,done:false,ts:null,dur:null}));
+
+// 旧キーからの移行（ある場合だけ）
+(function migrate(){
+  const old = localStorage.getItem("asadash_v9_4");
+  if(!old) return;
+  const st = JSON.parse(old);
+  // ISO文字列 -> ms に変換
+  ["A","B"].forEach(k=>{
+    st.kids?.[k]?.tasks?.forEach(t=>{
+      if(typeof t.ts === "string") t.ts = Date.parse(t.ts);
+    });
+  });
+  // 履歴も整形（date/finishedAt は作り直す）
+  if(Array.isArray(st.history)){
+    st.history = st.history.map(h=>{
+      const now = Date.now(); // 既存値が信用できないときは現在時刻でJSTフォーマット
+      return { date: fmtDateJST(now), finishedAt: fmtTimeJST(now), totalSec: h.totalSec||0 };
+    });
+  }
+  localStorage.setItem(KEY, JSON.stringify({
+    start: st.start || st.state?.start || DEFAULT_START,
+    depart: st.depart || st.state?.depart || DEFAULT_DEPART,
+    stars: st.stars||0,
+    kids: st.kids || {A:{tasks:cloneTasks()},B:{tasks:cloneTasks()}},
+    history: st.history || []
+  }));
+})();
+
 let state = JSON.parse(localStorage.getItem(KEY)||"null") || {
-  start: localStorage.getItem(KEY+":start")  || DEFAULT_START,
-  depart:localStorage.getItem(KEY+":depart") || DEFAULT_DEPART,
-  stars:0,
+  start:  localStorage.getItem(KEY+":start")  || DEFAULT_START,
+  depart: localStorage.getItem(KEY+":depart") || DEFAULT_DEPART,
+  stars: 0,
   kids:{A:{tasks:cloneTasks()},B:{tasks:cloneTasks()}},
   history:[]
 };
-const save=()=>{localStorage.setItem(KEY,JSON.stringify(state));localStorage.setItem(KEY+":start",state.start);localStorage.setItem(KEY+":depart",state.depart)}
+const sound = JSON.parse(localStorage.getItem(KEY+":sound")||"null") || { vol:55, muted:false, theme:"pop" };
+const save=()=>{localStorage.setItem(KEY,JSON.stringify(state));localStorage.setItem(KEY+":start",state.start);localStorage.setItem(KEY+":depart",state.depart);localStorage.setItem(KEY+":sound",JSON.stringify(sound))}
 
 /* ===== DOM ===== */
 const $subtitle=document.getElementById("subtitle");
@@ -129,57 +188,57 @@ const $stars=document.getElementById("stars");
 const $hist=document.getElementById("history");
 const $stats=document.getElementById("stats");
 const $top=document.getElementById("topCard");
+const $dlg=document.getElementById("soundDlg");
+const $vol=document.getElementById("vol");
+const $mute=document.getElementById("mute");
+const $soundBtn=document.getElementById("soundBtn");
 
 /* ===== 時間ユーティリティ ===== */
-const now=()=>new Date();
+const now=()=>Date.now();
 const parseHM=hm=>{const [h,m]=hm.split(":").map(Number);return {h,m}};
-const dateAt=(h,m,base)=>{const d=new Date(base||Date.now()); d.setHours(h,m,0,0); return d;}
+const dateAt=(h,m,baseMs)=>{const d=new Date(baseMs||Date.now()); d.setHours(h,m,0,0); return d.getTime(); }
 function getWindow(){
   const n=now();
   const {h:sh,m:sm}=parseHM(state.start||DEFAULT_START);
   const {h:dh,m:dm}=parseHM(state.depart||DEFAULT_DEPART);
   let start=dateAt(sh,sm,n);
   let depart=dateAt(dh,dm,n);
-  // 窓がマイナスにならないよう、出発を過ぎたら翌日に回す
-  if(n>depart){ start=new Date(start.getTime()+86400000); depart=new Date(depart.getTime()+86400000); }
-  // もし start>=depart になってたら、出発を start+1h に自動調整（表示だけ）
-  if(start>=depart){ depart=new Date(start.getTime()+3600000); }
+  if(n>depart){ start+=86400000; depart+=86400000; }
+  if(start>=depart){ depart=start+3600000; }
   return {now:n,start,depart};
 }
 const fmtSec=sec=>{const m=Math.floor(sec/60),s=sec%60;return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`}
 
-/* ===== 効果音 ===== */
-let audio;
-function sfx(k="click"){ try{
-  audio = audio || new (window.AudioContext||window.webkitAudioContext)();
-  const t0=audio.currentTime; const out=audio.createGain(); out.gain.value=.08; out.connect(audio.destination);
-  const beep=(f,t,d,type="sine")=>{const o=audio.createOscillator(),g=audio.createGain();o.type=type;o.frequency.value=f;o.connect(g);g.connect(out);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.25,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.start(t);o.stop(t+d+.02)};
-  if(k==="done"){beep(900,t0,.12,"triangle");beep(1200,t0+.08,.1,"triangle")}
-  else if(k==="win"){beep(660,t0,.18,"sawtooth");beep(880,t0,.18,"sawtooth");beep(1100,t0,.18,"sawtooth")}
-  else{beep(700,t0,.08,"sine")}
-}catch(e){}}
+/* ===== オーディオ（v9.4のまま） ===== */
+let AC, master, comp, delay, audioReady=false;
+function ensureAudio(){ if(audioReady) return; AC = new (window.AudioContext||window.webkitAudioContext)(); master=AC.createGain(); comp=AC.createDynamicsCompressor(); comp.threshold.value=-18; comp.knee.value=20; comp.ratio.value=6; comp.attack.value=0.003; comp.release.value=0.25; delay=AC.createDelay(0.6); const fb=AC.createGain(); fb.gain.value=0.18; delay.connect(fb); fb.connect(delay); master.connect(comp); comp.connect(delay); delay.connect(AC.destination); comp.connect(AC.destination); setVolume(sound.vol, sound.muted); audioReady=true; }
+function setVolume(v,muted=false){ if(!master) return; master.gain.setTargetAtTime((muted?0:Math.max(0,Math.min(1,v/100)))*0.9, AC.currentTime, 0.01); }
+function tone({f=880,t=0,d=.12,type="sine",pan=0}){ const o=AC.createOscillator(),g=AC.createGain(),p=AC.createStereoPanner(); o.type=type;o.frequency.value=f;o.connect(g);g.connect(p);p.connect(master);p.pan.value=pan; const ct=AC.currentTime; g.gain.setValueAtTime(.0001,ct+t); g.gain.linearRampToValueAtTime(.8,ct+t+.01); g.gain.exponentialRampToValueAtTime(.0001,ct+t+d); o.start(ct+t); o.stop(ct+t+d+.02); }
+function noise({t=0,d=.25,pan=0}){ const buf=AC.createBuffer(1, AC.sampleRate*d, AC.sampleRate); const data=buf.getChannelData(0); for(let i=0;i<data.length;i++) data[i]=(Math.random()*2-1)*(1-i/data.length); const src=AC.createBufferSource(); src.buffer=buf; const g=AC.createGain(),p=AC.createStereoPanner(); src.connect(g); g.connect(p); p.connect(master); p.pan.value=pan; g.gain.value=.6; const ct=AC.currentTime; src.start(ct+t); src.stop(ct+t+d); }
+function sfx(kind="click"){ try{ ensureAudio(); if(sound.muted) return; const theme=sound.theme; const base=Math.random()*.2; if(kind==="done"){ if(theme==="8bit"){ tone({f:700,t:base,d:.12,type:"square",pan:-.2}); tone({f:1050,t:base+.08,d:.1,type:"square",pan:.2}); } else if(theme==="party"){ tone({f:880,t:base,d:.14,type:"sawtooth",pan:-.3}); tone({f:1320,t:base+.08,d:.12,type:"triangle",pan:.3}); noise({t:base+.05,d:.15,pan:0}); } else { tone({f:900,t:base,d:.12,type:"triangle",pan:-.2}); tone({f:1200,t:base+.08,d:.1,type:"triangle",pan:.2}); } } else if(kind==="best"){ if(theme==="8bit"){ [1000,1400,1800].forEach((f,i)=>tone({f,t:base+i*.08,d:.1,type:"square",pan:i%2?.3:-.3})); } else if(theme==="party"){ [660,880,1100,1320].forEach((f,i)=>tone({f,t:base+i*.08,d:.12,type:"sawtooth",pan:(i-1)*.25})); noise({t:base+.25,d:.25,pan:0}); } else { [1100,1500,1900].forEach((f,i)=>tone({f,t:base+i*.07,d:.1,type:"triangle",pan:i%2?.35:-.35})); } } else if(kind==="win"){ if(theme==="8bit"){ [600,800,1000,1200].forEach((f,i)=>tone({f,t:base+i*.1,d:.16,type:"square",pan:(i-1)*.2})); noise({t:base+.25,d:.35,pan:0}); } else if(theme==="party"){ [520,660,880,1040,1320].forEach((f,i)=>tone({f,t:base+i*.09,d:.18,type:"sawtooth",pan:(i-2)*.25})); noise({t:base+.1,d:.45,pan:0}); } else { [660,880,1100].forEach((f,i)=>tone({f,t:base+i*.08,d:.18,type:"triangle",pan:(i-1)*.25})); tone({f:1760,t:base+.28,d:.12,type:"sine",pan:.2}); } } else { tone({f:700,t:base,d:.08,type:"sine"}); } }catch(e){} }
 
 /* ===== 紙吹雪 ===== */
 const cvs=document.getElementById("cele"), ctx=cvs.getContext("2d");
 function resize(){cvs.width=innerWidth;cvs.height=innerHeight} addEventListener("resize",resize); resize();
 let parts=[];
-function burst(){const x=innerWidth/2,y=80; for(let i=0;i<220;i++){parts.push({x,y,vx:(Math.random()-.5)*8,vy:Math.random()*-9-2,g:.12,size:Math.random()*6+3,color:["#facc15","#60a5fa","#34d399","#fb7185","#a78bfa","#f472b6","#10b981"][i%7],ttl:190})}}
-function sprinkleAt(el){const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+scrollY;for(let i=0;i<36;i++){parts.push({x,y,vx:(Math.random()-.5)*5,vy:Math.random()*-6-2,g:.18,size:Math.random()*5+2,color:["#facc15","#60a5fa","#34d399","#fb7185","#a78bfa","#f472b6","#10b981"][i%7],ttl:110})}}
+function burst(){const x=innerWidth/2,y=80; for(let i=0;i<260;i++){parts.push({x,y,vx:(Math.random()-.5)*8,vy:Math.random()*-9-2,g:.12,size:Math.random()*6+3,color:["#facc15","#60a5fa","#34d399","#fb7185","#a78bfa","#f472b6","#10b981"][i%7],ttl:190})}}
+function sprinkleAt(el){const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+scrollY;for(let i=0;i<40;i++){parts.push({x,y,vx:(Math.random()-.5)*5,vy:(Math.random()*-6)-2,g:.18,size:Math.random()*5+2,color:["#facc15","#60a5fa","#34d399","#fb7185","#a78bfa","#f472b6","#10b981"][i%7],ttl:110})}}
 !function anim(){ctx.clearRect(0,0,cvs.width,cvs.height);parts.forEach(p=>{p.ttl--;p.vy+=p.g;p.x+=p.vx;p.y+=p.vy;ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,p.size,p.size)});parts=parts.filter(p=>p.ttl>0&&p.y<cvs.height+30);requestAnimationFrame(anim)}();
 
-/* ===== UI描画 ===== */
+/* ===== タスク / UI ===== */
 function renderKid(kidId){
   const list=document.getElementById("tasks"+kidId); list.innerHTML="";
   const k=state.kids[kidId];
   k.tasks.forEach((t,idx)=>{
     const li=document.createElement("li");
     li.className="flex items-center justify-between p-3 rounded-xl border bg-white";
+    const timeText = t.ts ? `完了 ${fmtTimeJST(t.ts)}` : "";
     li.innerHTML=`
       <div class="flex items-center gap-3">
         <span class="text-2xl">${t.icon}</span>
         <div>
           <div class="font-bold ${t.done?'line-through opacity-60':''}">${t.title}</div>
-          <div class="text-[11px] text-gray-500" id="hint-${kidId}-${t.id}">${t.ts?('完了 '+t.ts.slice(11,16)):""}</div>
+          <div class="text-[11px] text-gray-500" id="hint-${kidId}-${t.id}">${timeText}</div>
         </div>
       </div>
       <button class="btn px-4 py-2 rounded-xl font-extrabold text-white ${t.done?'bg-gray-400':'bg-pink-500'}">${t.done?'もどす':'できた！'}</button>
@@ -187,12 +246,13 @@ function renderKid(kidId){
     const btn=li.querySelector("button");
     let lock=false;
     btn.onclick=()=>{
+      ensureAudio(); // iOS解禁
       if(lock) return; lock=true; setTimeout(()=>lock=false,500);
-      const nowIso=new Date().toISOString();
+      const nowMs = now();
       if(!t.done){
-        t.done=true; t.ts=nowIso;
-        const prev=(idx>0?k.tasks[idx-1].ts:dateAt(...Object.values(parseHM(state.start))).toISOString());
-        t.dur=Math.max(1,Math.floor((new Date(nowIso)-new Date(prev))/1000));
+        t.done=true; t.ts=nowMs; // ← ms保存
+        const prev=(idx>0?k.tasks[idx-1].ts:dateAt(...Object.values(parseHM(state.start)))); // ms
+        t.dur=Math.max(1,Math.floor((nowMs - prev)/1000));
         state.stars++; sfx("done"); sprinkleAt(li);
       }else{
         t.done=false; t.ts=null; t.dur=null; sfx("click");
@@ -211,7 +271,7 @@ function render(){
   $subtitle.textContent=`${state.depart}までに準備しよう`;
 }
 
-/* ===== タイマー ===== */
+/* ===== タイマー（JST表示） ===== */
 function tick(){
   const {now:n,start,depart}=getWindow();
   const rest=Math.max(0,Math.floor((depart-n)/1000));
@@ -223,7 +283,7 @@ function tick(){
 }
 setInterval(tick,250);
 
-/* ===== 履歴 & グラフ ===== */
+/* ===== 履歴 & グラフ（JSTで作成） ===== */
 let chart;
 function refreshHistory(){
   const items=state.history.slice(-7);
@@ -242,28 +302,42 @@ function refreshHistory(){
 }
 document.getElementById("clearHistory").onclick=()=>{ if(!confirm("履歴をすべて削除しますか？")) return; state.history=[]; save(); refreshHistory(); };
 
-/* ===== 完了判定 & ごほうび ===== */
+/* ===== 完了判定 & ごほうび（JSTで履歴に記録） ===== */
 const allDone=()=>KIDS.every(k=>state.kids[k].tasks.every(t=>t.done));
 function onFinish(){
+  ensureAudio();
   sfx("win"); burst();
   $top.classList.remove("flash"); void $top.offsetWidth; $top.classList.add("flash");
-  const ts=KIDS.flatMap(k=>state.kids[k].tasks.map(t=>t.ts).filter(Boolean)).map(x=>new Date(x)).sort((a,b)=>a-b);
+  const ts=KIDS.flatMap(k=>state.kids[k].tasks.map(t=>t.ts).filter(Boolean)).sort((a,b)=>a-b);
   if(ts.length){
     const totalSec=Math.max(1,Math.floor((ts.at(-1)-ts[0])/1000));
-    const rec={date:new Date().toISOString().slice(0,10), finishedAt:new Date().toTimeString().slice(0,5), totalSec};
+    const nowMs = now();
+    const rec={ date: fmtDateJST(nowMs), finishedAt: fmtTimeJST(nowMs), totalSec };
     state.history.push(rec); save(); refreshHistory();
   }
 }
 
-/* ===== イベント ===== */
-$start.addEventListener("change",()=>{ state.start=$start.value||DEFAULT_START; save(); tick(); });
-$depart.addEventListener("change",()=>{ state.depart=$depart.value||DEFAULT_DEPART; save(); render(); tick(); });
+/* ===== イベント・設定UI ===== */
+document.getElementById("soundBtn").onclick=()=>{ ensureAudio(); document.getElementById("vol").value=sound.vol; document.querySelectorAll('input[name="theme"]').forEach(r=>r.checked=(r.value===sound.theme)); document.getElementById("soundDlg").showModal(); };
+document.getElementById("closeDlg").onclick=()=> document.getElementById("soundDlg").close();
+document.getElementById("vol").addEventListener("input",e=>{ sound.vol=Number(e.target.value); setVolume(sound.vol, sound.muted); save(); });
+document.getElementById("mute").onclick=()=>{ sound.muted=!sound.muted; setVolume(sound.vol, sound.muted); document.getElementById("mute").textContent = sound.muted?"ミュート解除":"ミュート"; save(); };
+document.querySelectorAll('input[name="theme"]').forEach(r=> r.addEventListener("change",e=>{ sound.theme=e.target.value; save(); }));
+document.getElementById("test-done").onclick=()=>{ ensureAudio(); sfx("done"); };
+document.getElementById("test-win").onclick =()=>{ ensureAudio(); sfx("win"); };
+
+document.getElementById("startAt").addEventListener("change",e=>{ state.start=e.target.value||DEFAULT_START; save(); tick(); });
+document.getElementById("departAt").addEventListener("change",e=>{ state.depart=e.target.value||DEFAULT_DEPART; save(); render(); tick(); });
 
 /* ===== 初期化 ===== */
 (function init(){
-  $start.value=state.start||DEFAULT_START;
-  $depart.value=state.depart||DEFAULT_DEPART;
+  document.getElementById("startAt").value=state.start||DEFAULT_START;
+  document.getElementById("departAt").value=state.depart||DEFAULT_DEPART;
+  // 旧データのISO→ms移行（安全側：文字列は全部Date.parse）
+  ["A","B"].forEach(k=> state.kids[k].tasks.forEach(t=>{ if(typeof t.ts==="string") t.ts = Date.parse(t.ts); }));
+  save();
   render(); refreshHistory(); tick();
+  document.getElementById("mute").textContent = sound.muted ? "ミュート解除" : "ミュート";
 })();
 </script>
 </body>
